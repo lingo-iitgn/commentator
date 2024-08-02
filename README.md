@@ -1,4 +1,4 @@
-# commentator
+# Commentator
 
 - A Code-mixed Multilingual Text Annotation Framework.
 - Code-mixing on Hinglish Data.
@@ -6,7 +6,7 @@
 
 ### 1. Relevant Links :link:
 
-Source Code: [`https://anonymous.4open.science/r/commentator/`]([https://anonymous.4open.science/r/commentator/])
+Source Code: [`https://anonymous.4open.science/r/commentator/`]([https://github.com/lingo-iitgn/commentator/])
 
 ---
 
