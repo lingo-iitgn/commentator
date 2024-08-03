@@ -58,7 +58,7 @@ const POS = () => {
     const [feedbackVisible, setFeedbackVisible] = useState(false);
 
     const fetchPOSSentence = async () => {
-      const pos_id = JSON.parse(sessionStorage.getItem("pos_id"))+1;
+      const pos_id = JSON.parse(sessionStorage.getItem("pos_id"));
      // console.log(pos_id)
       const data = {
         pos_id,
