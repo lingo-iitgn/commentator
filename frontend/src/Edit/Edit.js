@@ -202,9 +202,6 @@ const Edit = props => {
                         <StyledDisplaySentenceContainer>
                             <StyledSentence>{sentence}</StyledSentence>
                         </StyledDisplaySentenceContainer>
-                        <div>
-                            <LanguageBtn selected={selected} setSelected={setSelected}/>
-                        </div>
                     </StyledSentenceContainer>
                     
                     <div>
