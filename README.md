@@ -139,7 +139,7 @@ c. Start the frontend local server.
 
 ##### Steps to Follow
 
-1. Start Frontend and Backend Local Server. (Refer 2.e & 3.c)
+1. Start Frontend and Backend Local Server. (Refer 4.e & 5.c)
 2. Create an admin account.
 3. Open MongoDB database and set `admin=True` to create superuser/admin account.
 4. Login to Admin Dashboard.
