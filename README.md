@@ -148,7 +148,6 @@ c. Start the frontend local server.
 
 
 ### 7. Contributors :busts_in_silhouette:
-Certainly! Here is the edited table:
 
 | <img width="75" alt="vs" src="https://github.com/user-attachments/assets/7df1cf63-b61e-4254-9480-c8408799f693"> | Rajvee Sheth | [`https://www.linkedin.com/in/rajvee-sheth`](https://www.linkedin.com/in/rajvee-sheth) |
 | ---------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------- |
