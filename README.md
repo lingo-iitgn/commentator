@@ -10,11 +10,11 @@ Source Code: [`https://github.com/lingo-iitgn/commentator/`]([https://github.com
 
 ---
 
-Live Demo: [`link`]()
+Live Demo: [`https://bit.ly/4cfqgyD`](https://bit.ly/4cfqgyD)
 
 ---
 
-Live Demo Website: [`link`]()
+Live Demo Website: [`https://lingo.iitgn.ac.in/`](https://lingo.iitgn.ac.in/)
 
 > Usage
 
