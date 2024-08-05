@@ -14,7 +14,7 @@ Live Demo: [`link`]()
 
 ---
 
-Live Demo Site: [`link`]()
+Live Demo Website: [`link`]()
 
 > Usage
 
