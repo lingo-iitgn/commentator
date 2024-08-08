@@ -696,7 +696,6 @@ def compare_annotators():
             counter -= 1
             # break
 
-    # return 'Good'
     return send_file('csv/compare.csv', as_attachment=True)
 
 
@@ -719,10 +718,6 @@ def submit_sentence():
     timeDifference = requestdata.get('timeDifference', None)
 
     lst = [selected, date, tag, hypertext, hashtags, timeDifference]
-    # print("list", lst)
-
-    # print(sentId, selected, tag)
-
 
     lid_collection.update_one({'username': username}, {
          '$set': {'sentId': sentId},
@@ -748,9 +743,6 @@ def submit_mat_sentence():
     lst = [selected, date, timeDifference]
     # print("list", lst)
 
-    # print(sentId, selected, tag)
-
-
     lid_collection.update_one({'username': username}, {
          '$set': {'mat_id': mat_id},
             '$push': {'matrixTag': lst}
@@ -763,9 +755,7 @@ def submit_mat_sentence():
 def submit_pos_sentence():
     user_collection = database.get_collection('pos')
     requestdata = json.loads(request.data)
-    #print(requestdata)
     requestdata = json.loads(requestdata['body'])
-    #print(requestdata)
 
     pos_id = requestdata['pos_id']
     pos_tag = requestdata['pos_tag']
@@ -820,10 +810,6 @@ def get_edit_sentence():
     print("Data: ", user)
     userTags = user['sentTag'][sentId-1]
 
-    # user_collection.update_one({'username': username}, {
-    #     '$set': {'sentTag[{sentId}]'.format(sentId=sentId-1): lst},
-    # })
-
     return jsonify({'result': userTags})
 
 @app.route('/get-mat-edit-sentence', methods=['GET', 'POST'])
@@ -844,11 +830,7 @@ def get_mat_edit_sentence():
     user = user[0]
     print("Data: ", user)
     userTags = user['matrixTag'][mat_id-1]
-
-    # user_collection.update_one({'username': username}, {
-    #     '$set': {'sentTag[{sentId}]'.format(sentId=sentId-1): lst},
-    # })
-
+            
     return jsonify({'result': userTags})
 
 @app.route('/pos-edit-sentence', methods=['GET', 'POST'])
@@ -911,10 +893,6 @@ def submit_edit_sentence():
     user_collection.update_one({'username': username}, {
         '$set': {'sentTag': sentTag}
     })
-
-    # user_collection.update_one({'username': username}, {
-    #     '$set': {'sentTag[{sentId}]'.format(sentId=sentId-1): lst},
-    # })
 
     return jsonify({'result': 'Message Stored Successfully'})
 
