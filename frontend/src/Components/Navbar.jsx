@@ -57,6 +57,11 @@ const Navbar = () => {
                         Edit Annotations
                     </StyledUsername>
             )}
+             {!logged_in_admin && location.pathname === '/matrix' && (
+                    <StyledUsername onClick={() => history('/Profilematrix')}>
+                        Edit Annotations
+                    </StyledUsername>
+            )}
             <StyledUsername 
                     style={{ 
                         borderColor: 'transparent',
