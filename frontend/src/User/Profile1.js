@@ -155,6 +155,11 @@ const Profile1 = () => {
                         onRowClick={(param) => navigate(`/edit1/${param.row.id}`)}
                     />
                 )}
+                {rows.length === 0 && (
+                    <StyledMessage>
+                        Please start annotating sentences first, then you can proceed with annotations.
+                    </StyledMessage>
+                )}
             </StyledDataGridContainer>
         </div>
     );
@@ -192,4 +197,15 @@ const StyledFlexer = styled.div`
     align-items: center;
     gap: 4px;
     overflow: hidden;
+`;
+
+const StyledMessage = styled.div`
+    font-size: 20px;
+    text-align: center;
+    margin: 28px auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+    font-weight: bold;
+    color: #333;
 `;
