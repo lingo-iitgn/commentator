@@ -5,11 +5,9 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../Components/Navbar';
 
-const Profile = () => {
+const Profilematrix = () => {
     const history = useNavigate();
-    const [rows, setRows] = useState([{
-        id: 0, sentence: 'Dummy Sentence', grammar: 'e'
-    }]);
+    const [rows, setRows] = useState([]);
     const [rangeStart, setRangeStart] = useState(1);
 
     const columns = [
@@ -18,19 +16,11 @@ const Profile = () => {
         { field: 'sentence', headerName: "Sentence", flex: 1, renderCell: (params) => {
             const {row} = params;
             const tagArray = row['sentence'];
-            if(tagArray !=='Dummy Sentence'){
-                return (<StyledFlexer>
-                    {tagArray && tagArray.map(elem => {
-                        return (
-                            <StyledWord tokenTag={elem['value']}>{elem['key']}</StyledWord>
-                        );
-                    })}
-                </StyledFlexer>); 
-            } else {
-                return ("Dummy Sentence");
-            }
+            const grammarTag = row['grammar'];
+            return (<StyledSentence tokenTag={grammarTag}>
+                {tagArray.map(elem => elem['key']).join(' ')}
+            </StyledSentence>);
         }},
-        // { field: 'grammar', headerName: "Grammar", width: 100 },
     ];
 
     const fetchAllSentences = async () => {
@@ -39,7 +29,7 @@ const Profile = () => {
             username,
             start: rangeStart,
         };
-        const res = axios.post(`${process.env.REACT_APP_BACKEND_URL}/all-sentences`, {
+        const res = axios.post(`${process.env.REACT_APP_BACKEND_URL}/all-m-sentences`, {
             method: "POST",
             headers: {
               "Content-type": "application-json",
@@ -48,34 +38,23 @@ const Profile = () => {
             body: JSON.stringify(data),
         });
 
-        //console.log(await res);
         let result = await res;
         result = result.data.result;
-        // console.log("result",result);
 
         let rowArr = [];
         let sid = rangeStart; 
 
-        const dateFormtatter = d => {
-            return (
-                d.split('T')[0]
-            );
-        };
+        const dateFormtatter = d => d.split('T')[0];
 
         result.map((elem) => {
-            let sentence = "";
-            //console.log(elem);
-            elem[2].map(word => {sentence = sentence + word['key'] + " "})
-            console.log(sentence);
-
+            let sentence = elem[2].map(word => word['key']).join(" ");
             const row = {
                 id: sid,
                 date: dateFormtatter(elem[1]),
                 sentence: elem[2],
-                // grammar: elem[0]
+                grammar: elem[0]
             };
             sid++;
-            console.log(row);
             rowArr.push(row);
         });
         setRows(rowArr);
@@ -89,84 +68,86 @@ const Profile = () => {
         fetchAllSentences();
     };
 
-    // useEffect(() => {
-    //     console.log(rows);
-    // }, [rows]);
-
     return (
         <div>
             <Navbar />
             <div style={{ margin: '70px 70px 10px 70px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
-            <input
-                type="number"
-                value={rangeStart}
-                onChange={(e) => {
-                const value = parseInt(e.target.value);
-                setRangeStart(value < 1 ? 1 : value); 
-                }}
-                min="1"
-                style={{ textAlign: 'center' }}
-                placeholder="Start"
-            />
-            <button 
-                onClick={handleRangeChange} 
-                style={{
-                    backgroundColor: '#FFD700',
-                    color: '#fff',
-                    border: 'none',
-                    padding: '10px 20px',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    fontWeight: 'bold',
-                    fontSize: '16px'
-                }}
-            >
-                Load Sentences
-            </button>
+                <input
+                    type="number"
+                    value={rangeStart}
+                    onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        setRangeStart(value < 1 ? 1 : value); 
+                    }}
+                    min="1"
+                    style={{ textAlign: 'center' }}
+                    placeholder="Start"
+                />
+                <button 
+                    onClick={handleRangeChange} 
+                    style={{
+                        backgroundColor: '#FFD700',
+                        color: '#fff',
+                        border: 'none',
+                        padding: '10px 20px',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                        fontSize: '16px'
+                    }}
+                >
+                    Load Sentences
+                </button>
             </div>
             <StyledDataGridContainer>
-                {rows.length > 0 && (<DataGrid
-                    rows={rows}
-                    columns={columns}
-                    pageSize={15}
-                    rowsPerPageOptions={[15]}
-                    onRowClick={(param) => history(`/edit/${param.row.id}`)}
-                />)}      
+                {rows.length > 0 ? (
+                    <DataGrid
+                        rows={rows}
+                        columns={columns}
+                        pageSize={15}
+                        rowsPerPageOptions={[15]}
+                        onRowClick={(param) => history(`/mat-edit/${param.row.id}`)}
+                    />
+                ) : (
+                    <StyledMessage>Please start by annotating sentences first; then you can proceed with editing the annotations.
+                    </StyledMessage>
+                )}
             </StyledDataGridContainer>
         </div>
     );
 };
 
-export default Profile;
+export default Profilematrix;
 
 const StyledDataGridContainer = styled.div`
     height: 80vh;
     width: 90%;
-    /* padding: 24px; */
     margin: 32px auto;
     overflow-x: hidden;
     cursor: pointer;
 `;
 
-const StyledWord = styled.div`
+const StyledSentence = styled.div`
     border-radius: 8px;
-    padding: 8px 8px;
+    padding: 8px;
     text-align: center;
-
-    display:flex;
-    flex: 0 1 10%;
-    justify-content: center;
-
-    background-color: ${props => props.tokenTag === 'e' && '#bbdfc8'};
-    background-color: ${props => props.tokenTag ==='h' && '#f3f2c9'};
-    background-color: ${props => props.tokenTag === 'u' && '#D4DCE9'};
-`;
-
-const StyledFlexer = styled.div`
-    display:flex;
+    display: flex;
     flex-direction: row;
     justify-content: start;
     align-items: center;
     gap: 4px;
     overflow: hidden;
+    background-color: #efefef;
+    color: #333;
+`;
+
+const StyledMessage = styled.div`
+    font-size: 20px;
+    text-align: center;
+    margin: 28px auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+    font-weight: bold;
+    color: #333;
 `;
