@@ -10,11 +10,13 @@ Source Code: [`https://github.com/lingo-iitgn/commentator/`]([https://github.com
 
 ---
 
-Live Demo: [`https://bit.ly/4cfqgyD`](https://bit.ly/4cfqgyD)
+Live Demo: [`https://bit.ly/commentator_video`]([https://bit.ly/4cfqgyD](https://bit.ly/commentator_video))
 
 ---
 
 Live Demo Website: [`https://lingo.iitgn.ac.in/`](https://lingo.iitgn.ac.in/)
+
+---
 
 > Usage
 
