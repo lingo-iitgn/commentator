@@ -18,7 +18,9 @@ import POS from './POS/POS';
 import Matrix from './Matrix/Matrix';
 import Profile from './User/Profile';
 import Profile1 from './User/Profile1';
+import Profilematrix from './User/Profile-matrix';
 import Edit from './Edit/Edit';
+import MatrixEdit from './Edit/Matrix-edit';
 import POSEDIT from './Edit/Pos-edit.js';
 
 
@@ -39,7 +41,9 @@ const Router = () => {
                 <Route path="/" exact element={<ProtectedRoute />}>
                     <Route exact path='/profile' element={<Profile/>}/>
                     <Route exact path='/profile1' element={<Profile1/>}/>
+                    <Route exact path='/Profilematrix' element={<Profilematrix/>}/>
                     <Route exact path='/edit/:sid' element={<Edit/>}/>
+                    <Route exact path='/mat-edit/:matid' element={<MatrixEdit/>}/>
                     <Route exact path='/edit1/:posid' element={<POSEDIT/>}/>
                     <Route exact path='/pos' element={<POS/>}/>
                     <Route exact path='/matrix' element={<Matrix/>}/>
