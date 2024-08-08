@@ -67,7 +67,7 @@ fronend
 
     REACT_APP_BACKEND_URL=http://<YOUR_BACKEND_IP_ADDRESS>:5010
     OR
-    REACT_APP_BACKEND_URL=http://localhost:5010
+    REACT_APP_BACKEND_URL=http://localhost:5000
 
 ---
 
