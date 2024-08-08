@@ -36,7 +36,7 @@ const Tasks = () => {
                     <AnimatedText>Spelling correction & normalization</AnimatedText>
                 </TaskContainer>
                 <TaskContainer color="#CE93D8" onClick={() => navigateTo('/task6')}>
-                    <AnimatedText>Parallel Translations</AnimatedText>
+                    <AnimatedText>Translations</AnimatedText>
                 </TaskContainer>
 
             </Row>
