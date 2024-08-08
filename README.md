@@ -206,3 +206,18 @@ e. Stop Docker Container by Container ID.
 - https://inception-project.github.io/
 - https://UBIAI.tools/
 - https://gate.ac.uk/download/
+
+## Citation
+
+If you use this framework in your research or work, please cite it as follows:
+
+```bibtex
+@misc{sheth2024commentatorcodemixedmultilingualtext,
+      title={COMMENTATOR: A Code-mixed Multilingual Text Annotation Framework}, 
+      author={Rajvee Sheth and Shubh Nisar and Heenaben Prajapati and Himanshu Beniwal and Mayank Singh},
+      year={2024},
+      eprint={2408.03125},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2408.03125}, 
+}
