@@ -65,7 +65,7 @@ fronend
 
 ##### frontend/src/.env
 
-    REACT_APP_BACKEND_URL=http://<YOUR_BACKEND_IP_ADDRESS>:5010
+    REACT_APP_BACKEND_URL=http://<YOUR_BACKEND_IP_ADDRESS>:5000
     OR
     REACT_APP_BACKEND_URL=http://localhost:5000
 
