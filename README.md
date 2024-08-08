@@ -145,8 +145,59 @@ c. Start the frontend local server.
 4. Login to Admin Dashboard.
 5. Upload sentences to the database (csv).
 
+### 7. Containerization of Backend using Docker :whale2:
 
-### 7. Mentions :eyes:
+##### Steps to Follow
+
+a. Creating a Docker Hub Account and a public repository
+
+> Visit https://hub.docker.com/
+
+b. Updating Dockerfile
+
+    FROM python:3.9-slim-buster
+    WORKDIR /commentator
+    COPY requirements.txt requirements.txt
+    RUN pip3 install -r requirements.txt
+    COPY . .
+    ENV FLASK_APP=app.py
+    CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+    EXPOSE 5000/tcp
+
+b. Push Image to Docker Hub
+
+    docker build . -t python-docker
+    docker tag python-docker <DOCKER_USERNAME>/<REPOSITORY_NAME>
+    docker push <DOCKER_USERNAME>/<REPOSITORY_NAME>
+
+c. Run Docker server on port 5000
+
+    docker run -dp 5000:5000 <DOCKER_USERNAME>/<REPOSITORY_NAME>
+
+d. List of active docker containers
+
+    docker ps
+
+e. Stop Docker Container by Container ID.
+
+    docker stop <CONTAINER_ID>
+
+---
+
+
+### 7. Contributors :busts_in_silhouette:
+
+| <img width="75" alt="line" src="https://via.placeholder.com/75x1/000000/000000?text="> |  |  |
+| ------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------- |
+| <img width="75" alt="vs" src="https://github.com/user-attachments/assets/7df1cf63-b61e-4254-9480-c8408799f693"> | Rajvee Sheth | [`https://www.linkedin.com/in/rajvee-sheth`](https://www.linkedin.com/in/rajvee-sheth) |
+| ------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------- |
+| <img width="75" alt="tn" src="https://user-images.githubusercontent.com/65038837/126761822-ca949453-540f-40f1-a8cd-9a1ed3e4cae2.jpeg"> | Shubh Nisar | [`https://shubh-nisar.github.io`](https://shubh-nisar.github.io) |
+| ------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------- |
+| <img width="75" alt="vs" src="https://github.com/user-attachments/assets/4b517aba-7bad-4234-8744-e90453cbb365"> | Mayank Singh | [`https://mayank4490.github.io/`](https://mayank4490.github.io/) |
+
+
+
+### 8. Mentions :eyes:
 
 - https://github.com/microsoft/LID-tool
 - https://github.com/sagorbrur/codeswitch
