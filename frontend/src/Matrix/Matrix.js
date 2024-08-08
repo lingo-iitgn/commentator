@@ -21,9 +21,11 @@ import MatrixRules from './MatrixRules';
 const Matrix = props => {
     const history = useNavigate();
     const [sentence, setSentence] = useState('Loading Sentence...');
+    const [feedback, setFeedback] = useState('');
     const [mat_id, setMat_id] = useState('');
     const [hypertext, setHypertext] = useState([]);
     const [hashtags, setHashtags] = useState([]);
+    const [feedbackVisible, setFeedbackVisible] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -89,6 +91,7 @@ const Matrix = props => {
         const username = JSON.parse(sessionStorage.getItem('annote_username'));
         const date = new Date();
         const endTime = new Date();
+        setFeedbackVisible(false);
 
         const timeDifference = (endTime.getTime() - startTime.getTime()) / 1000;
         console.log(timeDifference);
@@ -99,6 +102,7 @@ const Matrix = props => {
             username,
             date,
             timeDifference,
+            feedback,
         };
         const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/submit-matrix-sentence`, {
             method: "POST",
@@ -128,6 +132,19 @@ const Matrix = props => {
                             <LanguageBtn selected={selected} setSelected={setSelected} />
                         </div>
                     </StyledSentenceContainer>
+                    <StyledFlex>
+                    <FeedbackLabel htmlFor="feedback" onClick={() => setFeedbackVisible(!feedbackVisible)}>
+                            Feedback:
+                          </FeedbackLabel>
+                          {feedbackVisible && (
+                            <textarea
+                              id="feedback"
+                              value={feedback}
+                              onChange={(e) => setFeedback(e.target.value)}
+                              placeholder="Enter your feedback here"
+                            />
+                          )}
+                    </StyledFlex> 
 
                     <StyledSubmitContainer>
                         <StyledButton style={{ width: '100%' }} variant="contained" onClick={onSubmitHandler}>Submit</StyledButton>
@@ -185,7 +202,7 @@ const StyledFlex = styled.div`
     align-items: center;
     gap: 6px;
     width: 75%;
-    margin: 24px auto;
+    margin: 10px auto;
     flex-wrap: wrap;
 `;
 
@@ -202,11 +219,6 @@ const StyledWord = styled.div`
     justify-content: center;
 `;
 
-const StyledWordBreakup = styled.div`
-    font-size: 20px;
-    text-align: center;
-    margin: 28px auto 12px auto;
-`;
 
 const StyledSentenceContainer = styled.div`
     border: 2px solid #efefef;
@@ -221,7 +233,7 @@ const StyledSentenceContainer = styled.div`
 const StyledSubmitContainer = styled.div`
     width: 20%;
     text-align: center;
-    margin: 40px auto;
+    margin: 20px auto;
 `;
 
 const StyledSentenceId = styled.div`
@@ -231,4 +243,14 @@ const StyledSentenceId = styled.div`
     position: fixed;
     top: 75px;
     right: 20px;
+`;
+
+const FeedbackLabel = styled.label`
+  display: flex;
+  align-items: center;
+  align-content: center;
+  margin-top: 0px
+  margin-bottom: 0px;
+  font-weight: bold;
+  color: #333;
 `;
