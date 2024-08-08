@@ -10,7 +10,7 @@ Source Code: [`https://github.com/lingo-iitgn/commentator/`]([https://github.com
 
 ---
 
-Live Demo: [`Commentator Video`]((https://bit.ly/commentator_video/))
+Live Demo: [`Commentator Video`](https://bit.ly/commentator_video/)
 
 ---
 
