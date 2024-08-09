@@ -127,7 +127,8 @@ a. Navigate inside backend folder
     cd frontend
 
 b. Install all frontend dependencies post 1st application download.
-npm i
+
+    npm i
 
 c. Start the frontend local server.
 
