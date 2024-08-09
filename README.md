@@ -6,7 +6,7 @@
 
 ### 1. Relevant Links :link:
 
-Source Code: [`https://github.com/lingo-iitgn/commentator/`]([https://github.com/lingo-iitgn/commentator/])
+Source Code: [`https://github.com/lingo-iitgn/commentator/`](https://github.com/lingo-iitgn/commentator/)
 
 ---
 
