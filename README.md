@@ -51,8 +51,8 @@ fronend
 		Auth
 		Components
 		Edit
-    Matrix
-    POS
+                Matrix
+                POS
 		Home
 		User
 		utils
