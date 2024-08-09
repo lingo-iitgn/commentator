@@ -25,12 +25,12 @@ Live Demo Website: [`https://lingo.iitgn.ac.in/`](https://lingo.iitgn.ac.in/)
 - Sign-Up to create a new annotator account
 - Login using the credentials
 
-##### As an Admin
+##### As a user
 
 - Special Credentials :wink:
 
-      username: admin
-      password: admin
+      username: commentator
+      password: commentator
 
 ---
 
