@@ -122,7 +122,7 @@ e. Running the local server
 
 ##### Steps to Follow
 
-a. Navigate inside backend folder
+a. Navigate inside frontend folder
 
     cd frontend
 
