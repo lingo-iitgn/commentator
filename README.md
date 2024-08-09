@@ -23,15 +23,16 @@ Live Demo Website: [`https://lingo.iitgn.ac.in/`](https://lingo.iitgn.ac.in/)
 ##### As an Annotator
 
 - Sign-Up to create a new annotator account
-- Login using the credentials
-
-##### As a user
-
+- Login using the credentials 
 - Special Credentials :wink:
 
       username: commentator
       password: commentator
 
+##### As an admin
+
+      username: admin
+      password: admin
 ---
 
 ### 2. Folder Structure :books:
