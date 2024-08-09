@@ -15,8 +15,7 @@ import LanguageDetect from '../utils/LanguageDetect';
 import EnglishSplitter from '../utils/EnglishSplitter';
 import HindiSplitter from '../utils/HindiSplitter';
 import { StyledButton } from '../utils/styles';
-import Steps from '../Components/Steps';
-// import MatrixRules from './MatrixRules';
+import MatrixRules from '../Matrix/MatrixRules';
 
 
 const FetchSentence = async (id_prop) => {
@@ -173,7 +172,7 @@ const MatrixEdit = props => {
         <StyledContainer>
             <Navbar />
             <StyledGridder>
-                <Steps />
+                <MatrixRules />
                 <StyledRightContainer>
                     <StyledSentenceId>#{mat_id}</StyledSentenceId>
                     <StyledSentenceContainer>
