@@ -998,23 +998,26 @@ def all_sentence():
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def all_m_sentence():
     user_collection = database.get_collection('lid')
+    matrix_collection = database.get_collection('matrix')
     requestdata = json.loads(request.data)
-    print(requestdata)
     requestdata = json.loads(requestdata['body'])
 
     username = json.loads(requestdata['username'])
-    start = int(requestdata['start']-1)
+    start = int(requestdata['start'] - 1)
     end = start + 15
-    print('username: ', username)
-    
-    result = user_collection.find_one({'username': username})
-    if not result:
-        return jsonify({'error': 'User not found'}), 404
 
+    result = user_collection.find_one({'username': username})
     sent_tags = result.get('sentTag', [])
 
-    if end > len(sent_tags):
-        end = len(sent_tags)
+    matrix_result = matrix_collection.find_one({'username': username})
+    if not matrix_result:
+        return jsonify({'error': 'Matrix tags not found'}), 404
+
+    matrix_tags = matrix_result.get('matrixTag', [])
+    
+    if end > len(matrix_tags):
+        end = len(matrix_tags)
+    
     sent_tags_range = sent_tags[start:end]
 
     return jsonify({'result': sent_tags_range})
