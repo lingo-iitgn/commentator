@@ -458,114 +458,42 @@ def fetch_users_list():
 @app.route('/csv-download', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def csv_download():
-    from flask import send_file
-    import csv
-
     username = request.form.get('username')
     cmi = request.form.get('cmi')
     file_type = request.form.get('file_type')
     pos_file = None
     lid_file = None
-    # os.system('db_to_csv.py {}'.format(username))
+    matrix_file = None
+
     if username and username != 'ALL':
-            pos_collection = database.get_collection('pos')
-            lid_collection = database.get_collection('lid')
-
-            user = pos_collection.find_one({'username': username})
-            if user:
-                posTag = user.get('posTag', [])
-                pos_file = f'csv/{username}_pos.csv'
-                with open(pos_file, 'w', encoding='utf-8', newline="") as f:
-                    writer = csv.writer(f)
-                    writer.writerow(['date', 'time', 'tag', 'feedback'])
-                    for sentence in posTag:
-                        date = sentence[0]
-                        time = sentence[1]
-                        tags = sentence[2]
-                        # feedback = sentence[3]
-                        row = [date, time, tags]
-                        writer.writerow(row)
-
-            user = lid_collection.find_one({'username': username})
-            if user:
-                sentTag = user.get('sentTag', [])
-                lid_file = f'csv/{username}_lid.csv'
-                with open(lid_file, 'w', encoding='utf-8', newline="") as f:
-                    writer = csv.writer(f)
-                    writer.writerow(['grammar', 'date', 'tag', 'link', 'hashtag', 'time', 'CMI Score'])
-                    for sentence in sentTag:
-                        grammar = sentence[0]
-                        date = sentence[1]
-                        tag = sentence[2]
-                        link = sentence[3]
-                        hashtag = sentence[4] if sentence[4] else []
-                        time = sentence[5]
-                        # feedback = sentence[6]
-                        row = [grammar, date, tag, link, hashtag, time]
-
-                        en_count = 0
-                        hi_count = 0
-                        token_count = 0
-                        lang_ind_count = 0
-
-                        for i in range(len(tag)):
-                            if tag[i]['value'] == 'e':
-                                en_count += 1
-                            elif tag[i]['value'] == 'h':
-                                hi_count += 1
-                            elif tag[i]['value'] == 'u':
-                                lang_ind_count += 1
-                            token_count += 1
-
-                        max_w = max(en_count, hi_count)
-
-                        cmi_score = 0
-                        if token_count > lang_ind_count:
-                            cmi_score = 100 * (1 - (max_w / (token_count - lang_ind_count)))
-                        else:
-                            cmi_score = 0
-
-                        if cmi_score >= float(cmi):
-                            row.append(cmi_score)
-                            writer.writerow(row)
-            
-            if file_type == 'pos' and pos_file:
-                return send_file(pos_file, as_attachment=True)
-            elif file_type == 'lid' and lid_file:
-                return send_file(lid_file, as_attachment=True)
-            else:
-                return "File not found", 404
-
-    elif username == 'ALL':
         pos_collection = database.get_collection('pos')
         lid_collection = database.get_collection('lid')
+        matrix_collection = database.get_collection('matrix')
 
-        # Process all users in POS collection
-        all_users_pos = pos_collection.find()
-        pos_file = 'csv/all_pos.csv'
-        with open(pos_file, 'w', encoding='utf-8', newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(['username', 'date', 'time', 'tag', 'feedback'])
-            for user in all_users_pos:
-                username = user['username']
-                posTag = user.get('posTag', [])
+        # Process POS collection
+        user = pos_collection.find_one({'username': username})
+        if user:
+            posTag = user.get('posTag', [])
+            pos_file = f'csv/{username}_pos.csv'
+            with open(pos_file, 'w', encoding='utf-8', newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(['date', 'time', 'tag'])
                 for sentence in posTag:
                     date = sentence[0]
                     time = sentence[1]
                     tags = sentence[2]
                     feedback = sentence[3]
-                    row = [username, date, time, tags, feedback]
+                    row = [date, time, tags, feedback]
                     writer.writerow(row)
 
-        # Process all users in LID collection
-        all_users_lid = lid_collection.find()
-        lid_file = 'csv/all_lid.csv'
-        with open(lid_file, 'w', encoding='utf-8', newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(['username', 'grammar', 'date', 'tag', 'link', 'hashtag', 'time', 'CMI Score'])
-            for user in all_users_lid:
-                username = user['username']
-                sentTag = user.get('sentTag', [])
+        # Process LID collection
+        user = lid_collection.find_one({'username': username})
+        if user:
+            sentTag = user.get('sentTag', [])
+            lid_file = f'csv/{username}_lid.csv'
+            with open(lid_file, 'w', encoding='utf-8', newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(['grammar', 'date', 'tag', 'link', 'hashtag', 'time', 'CMI Score'])
                 for sentence in sentTag:
                     grammar = sentence[0]
                     date = sentence[1]
@@ -574,7 +502,7 @@ def csv_download():
                     hashtag = sentence[4] if sentence[4] else []
                     time = sentence[5]
                     feedback = sentence[6]
-                    row = [username, grammar, date, tag, link, hashtag, time, feedback]
+                    row = [grammar, date, tag, link, hashtag, time, feedback]
 
                     en_count = 0
                     hi_count = 0
@@ -602,11 +530,120 @@ def csv_download():
                         row.append(cmi_score)
                         writer.writerow(row)
 
+        # Process Matrix collection
+        user = matrix_collection.find_one({'username': username})
+        if user:
+            matrixTag = user.get('matrixTag', [])
+            matrix_file = f'csv/{username}_matrix.csv'
+            with open(matrix_file, 'w', encoding='utf-8', newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(['tags', 'date', 'time', 'feedback'])
+                for sentence in matrixTag:
+                   tags = sentence[0]
+                   date = sentence[1]
+                   time = sentence[2]
+                   row = [tags, date, time]
+                   writer.writerow(row)
+                   print(sentence)
+
+        if file_type == 'pos' and pos_file:
+            return send_file(pos_file, as_attachment=True)
+        elif file_type == 'lid' and lid_file:
+            return send_file(lid_file, as_attachment=True)
+        elif file_type == 'matrix' and matrix_file:
+            return send_file(matrix_file, as_attachment=True)
+        else:
+            return "File not found", 404
+
+    elif username == 'ALL':
+        pos_collection = database.get_collection('pos')
+        lid_collection = database.get_collection('lid')
+        matrix_collection = database.get_collection('matrix')
+
+        # Process all users in POS collection
+        all_users_pos = pos_collection.find()
+        pos_file = 'csv/all_pos.csv'
+        with open(pos_file, 'w', encoding='utf-8', newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(['username', 'date', 'time', 'tag', 'feedback'])
+            for user in all_users_pos:
+                username = user['username']
+                posTag = user.get('posTag', [])
+                for sentence in posTag:
+                    date = sentence[0]
+                    time = sentence[1]
+                    tags = sentence[2]
+                    feedback = sentence[3]
+                    row = [username, date, time, tags, feedback]
+                    writer.writerow(row)
+
+        # Process all users in LID collection
+        all_users_lid = lid_collection.find()
+        lid_file = 'csv/all_lid.csv'
+        with open(lid_file, 'w', encoding='utf-8', newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(['username', 'date', 'tag', 'link', 'hashtag', 'time', 'feedback', 'CMI Score'])
+            for user in all_users_lid:
+                username = user['username']
+                sentTag = user.get('sentTag', [])
+                for sentence in sentTag:
+                    date = sentence[1]
+                    tag = sentence[2]
+                    link = sentence[3]
+                    hashtag = sentence[4] if sentence[4] else []
+                    time = sentence[5]
+                    feedback = sentence[6]
+                    row = [username, date, tag, link, hashtag, time, feedback]
+
+                    en_count = 0
+                    hi_count = 0
+                    token_count = 0
+                    lang_ind_count = 0
+
+                    for i in range(len(tag)):
+                        if tag[i]['value'] == 'e':
+                            en_count += 1
+                        elif tag[i]['value'] == 'h':
+                            hi_count += 1
+                        elif tag[i]['value'] == 'u':
+                            lang_ind_count += 1
+                        token_count += 1
+
+                    max_w = max(en_count, hi_count)
+
+                    cmi_score = 0
+                    if token_count > lang_ind_count:
+                        cmi_score = 100 * (1 - (max_w / (token_count - lang_ind_count)))
+                    else:
+                        cmi_score = 0
+
+                    if cmi_score >= float(cmi):
+                        row.append(cmi_score)
+                        writer.writerow(row)
+
+        # Process all users in Matrix collection
+        all_users_matrix = matrix_collection.find()
+        matrix_file = 'csv/all_matrix.csv'
+        with open(matrix_file, 'w', encoding='utf-8', newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(['username', 'tags', 'date', 'time'])
+            for user in all_users_matrix:
+                username = user['username']
+                matrix_data = user.get('matrixTag', [])
+                for sentence in matrix_data:
+                    tags = sentence[0]
+                    date = sentence[1]
+                    time = sentence[2]
+                    row = [username, tags, date, time]
+                    writer.writerow(row)
+
         # Return the requested file
         if file_type == 'pos':
             return send_file(pos_file, as_attachment=True)
         elif file_type == 'lid':
             return send_file(lid_file, as_attachment=True)
+        elif file_type == 'matrix':
+            return send_file(matrix_file, as_attachment=True)
         else:
             return "File not found", 404
 
