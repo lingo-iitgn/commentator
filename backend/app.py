@@ -394,25 +394,22 @@ class NpEncoder(json.JSONEncoder):
 @app.route('/fetch-pos-sent', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def fetch_pos_sent():
-    pos_collection = database["sentences"]
-    requestdata = json.loads(request.data)
-    print(requestdata)
-    pos_id = requestdata['pos_id']
-    pos_list = pos_collection.find({'pos_id':pos_id})
+    pos_collection = database.get_collection('sentences')
+    pos_list = pos_collection.find({})
     pos_list = list(pos_list)
     #print(pos_list)
+
+    requestdata = json.loads(request.data)
+    print(requestdata)
+    requestdata = json.loads(requestdata['body'])
+
+    pos_id = requestdata['pos_id']
+
     pos_list_gen = []
-
-    if pos_id is not None:
-        pos_document = pos_collection.find_one({'pos_id':pos_id})
-
-        if pos_document:
-            pos_list_gen = [[pos_document['sentence'], pos_document['pos_tags']]]
-        else:
-            pos_list_gen = []
-    else:
-        pos_list_gen = []
-
+    for pos in pos_list:
+        if(pos['pos_id'] == int(pos_id) + 1):
+            pos_list_gen.append([pos['sentence'], pos['pos_tags']])
+            break
 
     return jsonify({'result': pos_list_gen})
 
