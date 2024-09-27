@@ -18,10 +18,6 @@ Live Demo Website: [`http://lingo.iitgn.ac.in:3001/login`](http://lingo.iitgn.ac
 
 ---
 
-Project Website: [`https://lingo.iitgn.ac.in/`](https://lingo.iitgn.ac.in/)
-
----
-
 > Usage
 
 ##### As an Annotator
