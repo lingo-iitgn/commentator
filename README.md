@@ -14,9 +14,6 @@ Demo Video: [`https://bit.ly/commentator_video`](https://bit.ly/commentator_vide
 
 ---
 
-Live Demo Website: [`http://lingo.iitgn.ac.in:3001/login`](http://lingo.iitgn.ac.in:3001/)
-
----
 
 > Usage
 
