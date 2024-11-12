@@ -218,9 +218,6 @@ If you use this framework in your research or work, please cite it as follows:
       Prajapati, Heenaben  and
       Beniwal, Himanshu  and
       Singh, Mayank",
-    editor = "Hernandez Farias, Delia Irazu  and
-      Hope, Tom  and
-      Li, Manling",
     booktitle = "Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing: System Demonstrations",
     month = nov,
     year = "2024",
