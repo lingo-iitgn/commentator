@@ -14,10 +14,6 @@ Demo Video: [`https://bit.ly/commentator_video`](https://bit.ly/commentator_vide
 
 ---
 
-Project Website: [`http://lingo.iitgn.ac.in`](http://lingo.iitgn.ac.in:3004/)
-
----
-
 > Usage
 
 ##### As an Annotator
@@ -215,12 +211,21 @@ e. Stop Docker Container by Container ID.
 If you use this framework in your research or work, please cite it as follows:
 
 ```bibtex
-@misc{sheth2024commentatorcodemixedmultilingualtext,
-      title={COMMENTATOR: A Code-mixed Multilingual Text Annotation Framework}, 
-      author={Rajvee Sheth and Shubh Nisar and Heenaben Prajapati and Himanshu Beniwal and Mayank Singh},
-      year={2024},
-      eprint={2408.03125},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL},
-      url={https://arxiv.org/abs/2408.03125}, 
+@inproceedings{sheth-etal-2024-commentator,
+    title = "Commentator: A Code-mixed Multilingual Text Annotation Framework",
+    author = "Sheth, Rajvee  and
+      Nisar, Shubh  and
+      Prajapati, Heenaben  and
+      Beniwal, Himanshu  and
+      Singh, Mayank",
+    editor = "Hernandez Farias, Delia Irazu  and
+      Hope, Tom  and
+      Li, Manling",
+    booktitle = "Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing: System Demonstrations",
+    month = nov,
+    year = "2024",
+    address = "Miami, Florida, USA",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2024.emnlp-demo.11",
+    pages = "101--109",
 }
