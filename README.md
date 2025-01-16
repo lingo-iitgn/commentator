@@ -191,7 +191,7 @@ e. Stop Docker Container by Container ID.
 
 ### 8. Contributors :busts_in_silhouette:
 
-| <img width="75" alt="line" src="https://via.placeholder.com/75x1/000000/000000?text="> |  |  |
+|  |  |  |
 | ------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------- |
 | <img width="75" alt="vs" src="https://github.com/user-attachments/assets/7df1cf63-b61e-4254-9480-c8408799f693"> | Rajvee Sheth | [`https://www.linkedin.com/in/rajvee-sheth`](https://www.linkedin.com/in/rajvee-sheth) |
 | <img width="75" alt="tn" src="https://user-images.githubusercontent.com/65038837/126761822-ca949453-540f-40f1-a8cd-9a1ed3e4cae2.jpeg"> | Shubh Nisar | [`https://shubh-nisar.github.io`](https://shubh-nisar.github.io) |
