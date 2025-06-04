@@ -175,7 +175,7 @@ e. Stop Docker Container by Container ID.
 ---
 ### 8. Relevant Links :link:
 
-Paper Link: [`https://github.com/lingo-iitgn/commentator/`](https://aclanthology.org/2024.emnlp-demo.11.pdf)
+Paper Link: [`https://aclanthology.org/2024.emnlp-demo.11.pdf`](https://aclanthology.org/2024.emnlp-demo.11.pdf)
 
 ---
 
