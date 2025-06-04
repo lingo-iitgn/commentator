@@ -173,7 +173,7 @@ e. Stop Docker Container by Container ID.
     docker stop <CONTAINER_ID>
 
 ---
-### 7. Relevant Links :link:
+### 8. Relevant Links :link:
 
 Paper Link: [`https://github.com/lingo-iitgn/commentator/`](https://github.com/lingo-iitgn/commentator/)
 
@@ -188,7 +188,7 @@ Project Website: [`https://lingo.iitgn.ac.in/codemixing/`](https://lingo.iitgn.a
 ---
 
 
-### 8. Contributors :busts_in_silhouette:
+### 9. Contributors :busts_in_silhouette:
 
 |  |  |  |
 | ------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------- |
@@ -199,7 +199,7 @@ Project Website: [`https://lingo.iitgn.ac.in/codemixing/`](https://lingo.iitgn.a
 | <img width="75" alt="vs" src="https://github.com/user-attachments/assets/4b517aba-7bad-4234-8744-e90453cbb365"> | Mayank Singh | [`https://mayank4490.github.io/`](https://mayank4490.github.io/) |
 
 
-### 9. Mentions :eyes:
+### 10. Mentions :eyes:
 
 - https://github.com/microsoft/LID-tool
 - https://github.com/sagorbrur/codeswitch
