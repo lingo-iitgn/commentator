@@ -133,7 +133,7 @@ c. Start the frontend local server.
 
 ---
 
-### 6. 🔐 Administrative Configuration :passport_control:
+### 6.  Administrative Configuration : 🔐
 
 ##### Steps to Follow
 
