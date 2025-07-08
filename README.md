@@ -11,7 +11,7 @@ To extend Commentator, refer to the `Configuration Changes` file in the **Docume
 ## 📁 Folder Structure
 
 
-### 1. 🔧 Usage
+### 1. Usage
 
 ### 👤 Annotator
 
@@ -29,7 +29,7 @@ To extend Commentator, refer to the `Configuration Changes` file in the **Docume
 
 ---
 
-### 2.  📁 Folder Structure :books:
+### 2. Folder Structure :books:
 
 ```
 backend
