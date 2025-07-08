@@ -3,25 +3,33 @@
 - A Code-mixed Multilingual Text Annotation Framework.
 - Code-mixing on Hinglish Data.
 - Easy extensibility to other code-mixed language pairs such as Gujarati-English, Marathi-English etc., In order to extend COMMENTATOR, please read the Configuration Changes file in the Documents section of this repository.
+  
+To extend Commentator, refer to the `Configuration Changes` file in the **Documents** folder.
 
-### 1. Usage
-
-##### As an Annotator
-
-- Sign-Up to create a new annotator account
-- Login using the credentials 
-- Special Credentials :wink:
-
-      username: commentator
-      password: commentator
-
-##### As an admin
-
-      username: admin
-      password: admin
 ---
 
-### 2. Folder Structure :books:
+## 📁 Folder Structure
+
+
+### 1. 🔧 Usage
+
+### 👤 Annotator
+
+1. Sign up to create an account  
+2. Log in using your credentials
+
+> **Demo Credentials**  
+> `username: commentator`  
+> `password: commentator`
+
+### 🔑 Admin Access
+
+> `username: admin`  
+> `password: admin`
+
+---
+
+### 2.  📁 Folder Structure :books:
 
 ```
 backend
@@ -31,7 +39,7 @@ backend
 	LID_tool
 fronend
 	build
-	node_module
+	node_modules
 	public
 	src
 		Admin
@@ -60,13 +68,13 @@ fronend
 
 ### 3. Database Schemas :department_store:
 
-|           |                                             |
-| --------- | ------------------------------------------- |
-| lid       | LID based Language Identification of Tokens |
-| matrix    | Matrix based Identification of Sentences    |
-| pos       | POS tags based Identification of Tokens     |
-| sentences | Sentences to be annotated                   |
-| users     | Admin & Annotator Accounts                  |
+| Collection |        Description                          |
+| ---------- | ------------------------------------------- |
+|  lid       | LID based Language Identification of Tokens |
+|  matrix    | Matrix based Identification of Sentences    |
+|  pos       | POS tags based Identification of Tokens     |
+|  sentences | Sentences to be annotated                   |
+|  users     | Admin & Annotator Accounts                  |
 
 
 ### 4. Backend [ Local Server ] :computer:
@@ -125,7 +133,7 @@ c. Start the frontend local server.
 
 ---
 
-### 6. Administrative Configuration :passport_control:
+### 6. 🔐 Administrative Configuration :passport_control:
 
 ##### Steps to Follow
 
