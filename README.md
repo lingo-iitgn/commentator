@@ -135,7 +135,7 @@ c. Start the frontend local server.
 
 ---
 
-### 6.  Administrative Configuration : 🔐
+### 6.  Administrative Configuration 🔐
 
 ##### Steps to Follow
 
