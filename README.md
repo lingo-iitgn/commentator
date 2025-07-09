@@ -24,7 +24,7 @@ To extend Commentator, refer to the `Configuration Changes` file in the **Docume
 
 ---
 
-### 👩‍💻 Interfaces 
+## 👩‍💻 Interfaces 
 
 It provides both annotator interface for efficient annotatation and admin interface for result export and analysis.
 
@@ -81,7 +81,7 @@ fronend
 
 ---
 
-### 📦 Database Schemas
+## 📦 Database Schemas
 
 | Collection |        Description                          |
 | ---------- | ------------------------------------------- |
@@ -148,7 +148,7 @@ c. Start the frontend local server.
 
 ---
 
-### 🔐 Administrative Configuration 
+## 🔐 Administrative Configuration 
 
 ##### Steps to Follow
 
@@ -158,7 +158,7 @@ c. Start the frontend local server.
 4. Login to Admin Dashboard.
 5. Upload sentences to the database (csv).
 
-### 🐳 Containerization of Backend using Docker 
+## 🐳 Containerization of Backend using Docker 
 
 ##### Steps to Follow
 
@@ -196,7 +196,7 @@ e. Stop Docker Container by Container ID.
     docker stop <CONTAINER_ID>
 
 ---
-### :link: Relevant Links 
+## :link: Relevant Links 
 
 Paper Link: [`https://aclanthology.org/2024.emnlp-demo.11.pdf`](https://aclanthology.org/2024.emnlp-demo.11.pdf)
 
@@ -211,7 +211,7 @@ Project Website: [`https://lingo.iitgn.ac.in/codemixing/`](https://lingo.iitgn.a
 ---
 
 
-### 👥 Contributors:
+## 👥 Contributors:
 
 ## Contributors
 
