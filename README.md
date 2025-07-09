@@ -44,7 +44,7 @@ It provides both annotator interface for efficient annotatation and admin interf
 
 ---
 
-### 📁 Folder Structure 
+## 📁 Folder Structure 
 
 ```
 backend
@@ -212,8 +212,6 @@ Project Website: [`https://lingo.iitgn.ac.in/codemixing/`](https://lingo.iitgn.a
 
 
 ## 👥 Contributors:
-
-## Contributors
 
 |   | Name | Link |
 |:-:|:-----|:-----|
