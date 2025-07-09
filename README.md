@@ -146,7 +146,7 @@ c. Start the frontend local server.
 4. Login to Admin Dashboard.
 5. Upload sentences to the database (csv).
 
-### 7. Containerization of Backend using Docker :🐳:
+### 7. Containerization of Backend using Docker 🐳
 
 ##### Steps to Follow
 
