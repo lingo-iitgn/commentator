@@ -185,7 +185,7 @@ e. Stop Docker Container by Container ID.
     docker stop <CONTAINER_ID>
 
 ---
-### Relevant Links :link:
+### :link: Relevant Links 
 
 Paper Link: [`https://aclanthology.org/2024.emnlp-demo.11.pdf`](https://aclanthology.org/2024.emnlp-demo.11.pdf)
 
