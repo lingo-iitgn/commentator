@@ -216,40 +216,38 @@ Project Website: [`https://lingo.iitgn.ac.in/codemixing/`](https://lingo.iitgn.a
 ## Contributors
 
 <div align="center">
-
 <table>
 <tr>
 <td align="center">
-<img width="100" alt="Rajvee Sheth" src="https://github.com/user-attachments/assets/7df1cf63-b61e-4254-9480-c8408799f693"><br/>
+<img width="80" alt="Rajvee Sheth" src="https://github.com/user-attachments/assets/7df1cf63-b61e-4254-9480-c8408799f693"><br/>
 <strong>Rajvee Sheth</strong><br/>
-<a href="https://www.linkedin.com/in/rajvee-sheth"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
+<a href="https://www.linkedin.com/in/rajvee-sheth">LinkedIn</a>
 </td>
 <td align="center">
-<img width="100" alt="Shubh Nisar" src="https://github.com/user-attachments/assets/0489b854-3c8e-479e-9aee-2e1c18b8ee0f"><br/>
+<img width="80" alt="Shubh Nisar" src="https://github.com/user-attachments/assets/0489b854-3c8e-479e-9aee-2e1c18b8ee0f"><br/>
 <strong>Shubh Nisar</strong><br/>
-<a href="https://shubh-nisar.github.io"><img src="https://img.shields.io/badge/Website-000000?style=flat&logo=About.me&logoColor=white" alt="Website"></a>
+<a href="https://shubh-nisar.github.io">Website</a>
 </td>
 <td align="center">
-<img width="100" alt="Heenaben Prajapati" src="https://github.com/user-attachments/assets/b1e0757c-df7d-4b44-87fe-0ca2fc65adc0"><br/>
+<img width="80" alt="Heenaben Prajapati" src="https://github.com/user-attachments/assets/b1e0757c-df7d-4b44-87fe-0ca2fc65adc0"><br/>
 <strong>Heenaben Prajapati</strong><br/>
-<a href="https://www.linkedin.com/in/heena-prajapati-4977851a5/"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
+<a href="https://www.linkedin.com/in/heena-prajapati-4977851a5/">LinkedIn</a>
 </td>
 </tr>
 <tr>
 <td align="center">
-<img width="100" alt="Himanshu Beniwal" src="https://github.com/user-attachments/assets/93682aa1-4eae-47de-937b-74bb8dbb3db9"><br/>
+<img width="80" alt="Himanshu Beniwal" src="https://github.com/user-attachments/assets/93682aa1-4eae-47de-937b-74bb8dbb3db9"><br/>
 <strong>Himanshu Beniwal</strong><br/>
-<a href="https://himanshubeniwal.github.io/"><img src="https://img.shields.io/badge/Website-000000?style=flat&logo=About.me&logoColor=white" alt="Website"></a>
+<a href="https://himanshubeniwal.github.io/">Website</a>
 </td>
 <td align="center">
-<img width="100" alt="Mayank Singh" src="https://github.com/user-attachments/assets/4b517aba-7bad-4234-8744-e90453cbb365"><br/>
+<img width="80" alt="Mayank Singh" src="https://github.com/user-attachments/assets/4b517aba-7bad-4234-8744-e90453cbb365"><br/>
 <strong>Mayank Singh</strong><br/>
-<a href="https://mayank4490.github.io/"><img src="https://img.shields.io/badge/Website-000000?style=flat&logo=About.me&logoColor=white" alt="Website"></a>
+<a href="https://mayank4490.github.io/">Website</a>
 </td>
 <td></td>
 </tr>
 </table>
-
 </div>
 
 ---
