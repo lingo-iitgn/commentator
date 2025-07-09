@@ -215,41 +215,13 @@ Project Website: [`https://lingo.iitgn.ac.in/codemixing/`](https://lingo.iitgn.a
 
 ## Contributors
 
-<div align="center">
-<table>
-<tr>
-<td align="center">
-<img width="80" alt="Rajvee Sheth" src="https://github.com/user-attachments/assets/7df1cf63-b61e-4254-9480-c8408799f693"><br/>
-<strong>Rajvee Sheth</strong><br/>
-<a href="https://www.linkedin.com/in/rajvee-sheth">LinkedIn</a>
-</td>
-<td align="center">
-<img width="80" alt="Shubh Nisar" src="https://github.com/user-attachments/assets/0489b854-3c8e-479e-9aee-2e1c18b8ee0f"><br/>
-<strong>Shubh Nisar</strong><br/>
-<a href="https://shubh-nisar.github.io">Website</a>
-</td>
-<td align="center">
-<img width="80" alt="Heenaben Prajapati" src="https://github.com/user-attachments/assets/b1e0757c-df7d-4b44-87fe-0ca2fc65adc0"><br/>
-<strong>Heenaben Prajapati</strong><br/>
-<a href="https://www.linkedin.com/in/heena-prajapati-4977851a5/">LinkedIn</a>
-</td>
-</tr>
-<tr>
-<td align="center">
-<img width="80" alt="Himanshu Beniwal" src="https://github.com/user-attachments/assets/93682aa1-4eae-47de-937b-74bb8dbb3db9"><br/>
-<strong>Himanshu Beniwal</strong><br/>
-<a href="https://himanshubeniwal.github.io/">Website</a>
-</td>
-<td align="center">
-<img width="80" alt="Mayank Singh" src="https://github.com/user-attachments/assets/4b517aba-7bad-4234-8744-e90453cbb365"><br/>
-<strong>Mayank Singh</strong><br/>
-<a href="https://mayank4490.github.io/">Website</a>
-</td>
-<td></td>
-</tr>
-</table>
-</div>
-
+|  |  |  |
+| ------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------- |
+| <img width="75" alt="vs" src="https://github.com/user-attachments/assets/7df1cf63-b61e-4254-9480-c8408799f693"> | Rajvee Sheth | [`https://www.linkedin.com/in/rajvee-sheth`](https://www.linkedin.com/in/rajvee-sheth) |
+| <img width="75" alt="tn" src="https://github.com/user-attachments/assets/0489b854-3c8e-479e-9aee-2e1c18b8ee0f"> | Shubh Nisar | [`https://shubh-nisar.github.io`](https://shubh-nisar.github.io) |
+| <img width="75" alt="vs" src="https://github.com/user-attachments/assets/b1e0757c-df7d-4b44-87fe-0ca2fc65adc0">| Heenaben Prajapati | [`https://www.linkedin.com/in/heena-prajapati-4977851a5/`](https://www.linkedin.com/in/heena-prajapati-4977851a5/) |
+| <img width="75" alt="tn" src="https://github.com/user-attachments/assets/93682aa1-4eae-47de-937b-74bb8dbb3db9"> | Himanshu Beniwal | [`https://himanshubeniwal.github.io/`](https://himanshubeniwal.github.io/) |
+| <img width="75" alt="vs" src="https://github.com/user-attachments/assets/4b517aba-7bad-4234-8744-e90453cbb365"> | Mayank Singh | [`https://mayank4490.github.io/`](https://mayank4490.github.io/) |
 ---
 
 
