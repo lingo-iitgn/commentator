@@ -10,6 +10,7 @@
   </p>
 </div>
 
+
 ### Overview: 
 A code-mixed annotation tool designed to significantly enhance annotation quality and efficiency. It reduces annotation time and operational overheads by providing advanced features tailored for code-mixed data. The tool offers intuitive interfaces, automated suggestions, and robust error-checking mechanisms.
 
@@ -215,7 +216,7 @@ Project Website: [`https://lingo.iitgn.ac.in/codemixing/`](https://lingo.iitgn.a
 |  |  |  |
 | ------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------- |
 | <img width="75" alt="vs" src="https://github.com/user-attachments/assets/7df1cf63-b61e-4254-9480-c8408799f693"> | Rajvee Sheth | [`https://www.linkedin.com/in/rajvee-sheth`](https://www.linkedin.com/in/rajvee-sheth) |
-| <img width="75" alt="tn" src="https://user-images.githubusercontent.com/65038837/126761822-ca949453-540f-40f1-a8cd-9a1ed3e4cae2.jpeg"> | Shubh Nisar | [`https://shubh-nisar.github.io`](https://shubh-nisar.github.io) |
+| <img width="75" alt="tn" src="![Shubh](https://github.com/user-attachments/assets/0489b854-3c8e-479e-9aee-2e1c18b8ee0f)"> | Shubh Nisar | [`https://shubh-nisar.github.io`](https://shubh-nisar.github.io) |
 | <img width="75" alt="vs" src="https://github.com/user-attachments/assets/b1e0757c-df7d-4b44-87fe-0ca2fc65adc0">| Heenaben Prajapati | [`https://www.linkedin.com/in/heena-prajapati-4977851a5/`](https://www.linkedin.com/in/heena-prajapati-4977851a5/) |
 | <img width="75" alt="tn" src="https://github.com/user-attachments/assets/93682aa1-4eae-47de-937b-74bb8dbb3db9"> | Himanshu Beniwal | [`https://himanshubeniwal.github.io/`](https://himanshubeniwal.github.io/) |
 | <img width="75" alt="vs" src="https://github.com/user-attachments/assets/4b517aba-7bad-4234-8744-e90453cbb365"> | Mayank Singh | [`https://mayank4490.github.io/`](https://mayank4490.github.io/) |
