@@ -1,5 +1,21 @@
 # Commentator :writing_hand:: A Code-mixed Multilingual Text Annotation Framework.
-
+<p>
+  <a href="https://aclanthology.org/2024.emnlp-demo.11.pdf">
+    <img alt="Paper" src="https://img.shields.io/badge/EMNLP--2024-Demo-Paper-orange?logo=acm&logoColor=white">
+  </a>
+  <a href="https://lingo.iitgn.ac.in/codemixing/">
+    <img alt="Website" src="https://img.shields.io/badge/Project-Website-blue?logo=google-chrome">
+  </a>
+  <a href="https://bit.ly/commentator_video">
+    <img alt="Demo" src="https://img.shields.io/badge/Live-Demo-9cf?logo=youtube">
+  </a>
+  <a href="https://github.com/rajveesheth/commentator/blob/main/LICENSE">
+    <img alt="License" src="https://img.shields.io/github/license/rajveesheth/commentator?color=brightgreen">
+  </a>
+  <a href="https://github.com/rajveesheth/commentator/stargazers">
+    <img alt="Stars" src="https://img.shields.io/github/stars/rajveesheth/commentator?style=social">
+  </a>
+</p>
 ### About: 
 A code-mixed annotation tool designed to significantly enhance annotation quality and efficiency. It reduces annotation time and operational overheads by providing advanced features tailored for code-mixed data. The tool offers intuitive interfaces, automated suggestions, and robust error-checking mechanisms.
 
