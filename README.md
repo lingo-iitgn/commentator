@@ -5,10 +5,10 @@
     <img alt="Website" src="https://img.shields.io/badge/Project-Website-blue?logo=google-chrome">
   </a>
   <a href="https://github.com/rajveesheth/commentator/blob/main/LICENSE">
-    <img alt="License" src="https://img.shields.io/github/license/rajveesheth/commentator?color=brightgreen">
+    <img alt="License" src="https://img.shields.io/github/license/color=brightgreen">
   </a>
   <a href="https://github.com/rajveesheth/commentator/releases">
-    <img alt="Version" src="https://img.shields.io/github/v/release/rajveesheth/commentator?label=version&color=blueviolet">
+    <img alt="Version" src="https://img.shields.io/github/v/release/label=version&color=blueviolet">
   </a>
 </p>
 
