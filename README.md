@@ -13,7 +13,8 @@ To extend Commentator, refer to the `Configuration Changes` file in the **Docume
 
 ---
 
-### 1. Usage
+### 1. Interface: 
+It provides both annotator interface for efficient annotatation and admin interface for result export and analysis.
 
 ### 👤 Annotator
 
