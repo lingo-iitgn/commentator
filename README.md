@@ -13,7 +13,8 @@ To extend Commentator, refer to the `Configuration Changes` file in the **Docume
 
 ---
 
-### 1. Interface: 
+### 👩‍💻 Interfaces 
+
 It provides both annotator interface for efficient annotatation and admin interface for result export and analysis.
 
 ### 👤 Annotator
@@ -32,7 +33,7 @@ It provides both annotator interface for efficient annotatation and admin interf
 
 ---
 
-### 2. Folder Structure 📁
+### 📁 Folder Structure 
 
 ```
 backend
@@ -69,7 +70,7 @@ fronend
 
 ---
 
-### 3. Database Schemas :department_store:
+### 📦 Database Schemas
 
 | Collection |        Description                          |
 | ---------- | ------------------------------------------- |
@@ -80,7 +81,7 @@ fronend
 |  users     | Admin & Annotator Accounts                  |
 
 
-### 4. Backend [ Local Server ] :computer:
+### 🖥️ Backend [ Local Server ] 
 
 ##### Steps to Follow
 
@@ -116,7 +117,7 @@ e. Running the local server
 
 ---
 
-### 5. Frontend [ Local Server ] :computer:
+### 🖥️ Frontend [ Local Server ] 
 
 ##### Steps to Follow
 
@@ -136,7 +137,7 @@ c. Start the frontend local server.
 
 ---
 
-### 6.  Administrative Configuration 🔐
+### 🔐 Administrative Configuration 
 
 ##### Steps to Follow
 
@@ -146,7 +147,7 @@ c. Start the frontend local server.
 4. Login to Admin Dashboard.
 5. Upload sentences to the database (csv).
 
-### 7. Containerization of Backend using Docker 🐳
+### 🐳 Containerization of Backend using Docker 
 
 ##### Steps to Follow
 
@@ -184,7 +185,7 @@ e. Stop Docker Container by Container ID.
     docker stop <CONTAINER_ID>
 
 ---
-### 8. Relevant Links :link:
+### Relevant Links :link:
 
 Paper Link: [`https://aclanthology.org/2024.emnlp-demo.11.pdf`](https://aclanthology.org/2024.emnlp-demo.11.pdf)
 
@@ -199,7 +200,7 @@ Project Website: [`https://lingo.iitgn.ac.in/codemixing/`](https://lingo.iitgn.a
 ---
 
 
-### 9. Contributors :busts_in_silhouette:
+### 👥 Contributors :busts_in_silhouette:
 
 |  |  |  |
 | ------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------- |
@@ -210,7 +211,7 @@ Project Website: [`https://lingo.iitgn.ac.in/codemixing/`](https://lingo.iitgn.a
 | <img width="75" alt="vs" src="https://github.com/user-attachments/assets/4b517aba-7bad-4234-8744-e90453cbb365"> | Mayank Singh | [`https://mayank4490.github.io/`](https://mayank4490.github.io/) |
 
 
-### 10. Mentions :eyes:
+### Mentions :eyes:
 
 - https://github.com/microsoft/LID-tool
 - https://github.com/sagorbrur/codeswitch
