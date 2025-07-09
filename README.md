@@ -1,9 +1,6 @@
 # Commentator :writing_hand:: A Code-mixed Multilingual Text Annotation Framework.
 <div align="center">
 <p>
-  <a href="https://aclanthology.org/2024.emnlp-demo.11.pdf">
-    <img alt="Paper" src="https://img.shields.io/badge/EMNLP--2024-Demo-Paper-orange?logo=acm&logoColor=white">
-  </a>
   <a href="https://lingo.iitgn.ac.in/codemixing/">
     <img alt="Website" src="https://img.shields.io/badge/Project-Website-blue?logo=google-chrome">
   </a>
