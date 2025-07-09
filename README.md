@@ -2,6 +2,7 @@
 <!--   <a href="https://lingo.iitgn.ac.in/codemixing/">
     <img alt="Website" src="https://img.shields.io/badge/Project-Website-brightgreen">
   </a> -->
+  <div align="center">
   <p>
     <a href="https://aclanthology.org/2024.emnlp-demo.11.pdf">
     <img alt="EMNLP" src="https://img.shields.io/badge/EMNLP-2024-brightgreen"> 
@@ -10,7 +11,7 @@
     <a href="https://github.com/lingo-iitgn/commentator/">
     <img alt="Version" src="https://img.shields.io/badge/version-1.0-blueviolet"> </a>
   </p>
-  
+  </div>
 
 
 
