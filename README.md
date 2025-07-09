@@ -4,11 +4,11 @@
   <a href="https://lingo.iitgn.ac.in/codemixing/">
     <img alt="Website" src="https://img.shields.io/badge/Project-Website-blue?logo=google-chrome">
   </a>
-  <a href="https://github.com/lingo-iitgn/commentator/blob/main/LICENSE">
+  <a href="https://github.com/rajveesheth/commentator/blob/main/LICENSE">
     <img alt="License" src="https://img.shields.io/github/license/rajveesheth/commentator?color=brightgreen">
   </a>
-  <a href="https://github.com/rajveesheth/commentator/releases/tag/v1.0">
-    <img alt="Version" src="https://img.shields.io/badge/version-1.0-blueviolet">
+  <a href="https://github.com/rajveesheth/commentator/releases">
+    <img alt="Version" src="https://img.shields.io/github/v/release/rajveesheth/commentator?label=version&color=blueviolet">
   </a>
 </p>
 
