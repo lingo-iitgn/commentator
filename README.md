@@ -5,10 +5,10 @@
     <img alt="Website" src="https://img.shields.io/badge/Project-Website-brightgreen">
   </a> -->
   <p>
-    <a href="https://github.com/lingo-iitgn/commentator/blob/main/LICENSE">
-    <img alt="License" src="https://img.shields.io/badge/License-Apache 2.0-blue"> </a>
     <a href="https://aclanthology.org/2024.emnlp-demo.11.pdf">
-    <img alt="EMNLP" src="https://img.shields.io/badge/EMNLP-2024-brightgreen"> </a>
+    <img alt="EMNLP" src="https://img.shields.io/badge/EMNLP-2024-brightgreen"> 
+    <a href="https://github.com/lingo-iitgn/commentator/blob/main/LICENSE">
+    <img alt="License" src="https://img.shields.io/badge/License-Apache 2.0-blue"> 
     <img alt="Version" src="https://img.shields.io/badge/version-1.0-blueviolet"> </a>
   </p>
   
