@@ -7,9 +7,9 @@ A code-mixed annotation tool designed to significantly enhance annotation qualit
 - Easy extensibility to other code-mixed language pairs such as Gujarati-English, Marathi-English etc., In order to extend COMMENTATOR, please read the Configuration Changes file in the Documents section of this repository.
 - For more details, please refer to [`our paper (EMNLP 2024:demo)`](https://aclanthology.org/2024.emnlp-demo.11.pdf).
 
-To extend Commentator, refer to the `Configuration Changes` file in the **Documents** folder.
-
 This GUI annotation tool is built with a ReactJS frontend, a Flask backend, and uses MongoDB for data storage.
+
+To extend Commentator, refer to the `Configuration Changes` file in the **Documents** folder.
 
 ---
 
