@@ -3,18 +3,14 @@
     <img alt="Website" src="https://img.shields.io/badge/Project-Website-brightgreen">
   </a> -->
   <div align="center">
-  <p>
-    <a href="https://aclanthology.org/2024.emnlp-demo.11.pdf">
-      <img alt="EMNLP" src="https://img.shields.io/badge/EMNLP-2024-brightgreen">
-    </a>
-    <a href="https://github.com/lingo-iitgn/commentator/blob/main/LICENSE">
-      <img alt="License" src="https://img.shields.io/badge/License-Apache 2.0-blue">
-    </a>
-    <a href="https://github.com/lingo-iitgn/commentator/">
-      <img alt="Version" src="https://img.shields.io/badge/version-1.0-blueviolet">
-    </a>
-  </p>
+  [![EMNLP 2024](https://img.shields.io/badge/EMNLP-2024-brightgreen)](https://aclanthology.org/2024.emnlp-demo.11.pdf)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue)](https://github.com/lingo-iitgn/commentator/blob/main/LICENSE)
+[![Version](https://img.shields.io/badge/version-1.0-blueviolet)](https://github.com/lingo-iitgn/commentator/)
+
+  
 </div>
+
+
 
 
 
