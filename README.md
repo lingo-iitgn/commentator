@@ -2,10 +2,10 @@
 <div align="center">
 <p>
 <!--   <a href="https://lingo.iitgn.ac.in/codemixing/">
-    <img alt="Website" src="https://img.shields.io/badge/Project-Website-blue">
+    <img alt="Website" src="https://img.shields.io/badge/Project-Website-brightgreen">
   </a> -->
   <a href="https://github.com/rajveesheth/commentator/blob/main/LICENSE">
-    <img alt="License" src="https://img.shields.io/badge/License-Apache 2.0-brightgreen">
+    <img alt="License" src="https://img.shields.io/badge/License-Apache 2.0-blue">
   </a>
   <a href="https://github.com/rajveesheth/commentator/releases">
     <img alt="Version" src="https://img.shields.io/badge/version-1.0-blueviolet">
