@@ -215,7 +215,6 @@ Project Website: [`https://lingo.iitgn.ac.in/codemixing/`](https://lingo.iitgn.a
 
 |   | Name | Link |
 |:-:|:-----|:-----|
-
 | ![](https://github.com/user-attachments/assets/7df1cf63-b61e-4254-9480-c8408799f693) | **Rajvee Sheth** | [linkedin.com/in/rajvee-sheth](https://www.linkedin.com/in/rajvee-sheth) |
 | ![](https://github.com/user-attachments/assets/0489b854-3c8e-479e-9aee-2e1c18b8ee0f) | **Shubh Nisar** | [shubh-nisar.github.io](https://shubh-nisar.github.io) |
 | ![](https://github.com/user-attachments/assets/b1e0757c-df7d-4b44-87fe-0ca2fc65adc0) | **Heenaben Prajapati** | [linkedin.com/in/heena-prajapati-4977851a5](https://www.linkedin.com/in/heena-prajapati-4977851a5/) |
