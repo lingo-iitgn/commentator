@@ -14,7 +14,7 @@
   </p>
   
 
-</div>
+
 
 ### About: 
 A code-mixed annotation tool designed to significantly enhance annotation quality and efficiency. It reduces annotation time and operational overheads by providing advanced features tailored for code-mixed data. The tool offers intuitive interfaces, automated suggestions, and robust error-checking mechanisms.
@@ -26,7 +26,7 @@ A code-mixed annotation tool designed to significantly enhance annotation qualit
 This GUI annotation tool is built with a ReactJS frontend, a Flask backend, and uses MongoDB for data storage.
 
 To extend Commentator, refer to the `Configuration Changes` file in the **Documents** folder.
-
+</div>
 ---
 
 ### 👩‍💻 Interfaces 
