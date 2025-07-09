@@ -1,7 +1,7 @@
 # Commentator :writing_hand:: A Code-mixed Multilingual Text Annotation Framework.
 
-### About:
-
+### About: 
+A code-mixed annotation tool designed to significantly enhance annotation quality and efficiency. It reduces annotation time and operational overheads by providing advanced features tailored for code-mixed data. The tool offers intuitive interfaces, automated suggestions, and robust error-checking mechanisms.
 
 - Specifically designed for annotating code-mixed text.
 - Easy extensibility to other code-mixed language pairs such as Gujarati-English, Marathi-English etc., In order to extend COMMENTATOR, please read the Configuration Changes file in the Documents section of this repository.
