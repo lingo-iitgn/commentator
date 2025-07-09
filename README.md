@@ -211,7 +211,7 @@ Project Website: [`https://lingo.iitgn.ac.in/codemixing/`](https://lingo.iitgn.a
 | <img width="75" alt="vs" src="https://github.com/user-attachments/assets/4b517aba-7bad-4234-8744-e90453cbb365"> | Mayank Singh | [`https://mayank4490.github.io/`](https://mayank4490.github.io/) |
 
 
-### Mentions :eyes:
+### 👀 Mentions 
 
 - https://github.com/microsoft/LID-tool
 - https://github.com/sagorbrur/codeswitch
