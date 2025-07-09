@@ -8,7 +8,6 @@
     <img alt="License" src="https://img.shields.io/badge/License-Apache 2.0-blue">
   <a href="https://github.com/rajveesheth/commentator/releases">
     <img alt="Version" src="https://img.shields.io/badge/version-1.0-blueviolet">
-  </a>
 </p>
 
 </div>
