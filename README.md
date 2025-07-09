@@ -9,6 +9,8 @@ A code-mixed annotation tool designed to significantly enhance annotation qualit
 
 To extend Commentator, refer to the `Configuration Changes` file in the **Documents** folder.
 
+This GUI annotation tool is built with a ReactJS frontend, a Flask backend, and uses MongoDB for data storage.
+
 ---
 
 ### 1. Usage
