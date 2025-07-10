@@ -213,7 +213,7 @@ Project Website: [`https://lingo.iitgn.ac.in/codemixing/`](https://lingo.iitgn.a
 
 ## 👥 Contributors:
 
-|   | Name | Link |
+|   | Name | Socials |
 |:-:|:-----|:-----|
 | <img src="https://github.com/user-attachments/assets/7df1cf63-b61e-4254-9480-c8408799f693" width="75" style="border-radius: 8px;" /> | **Rajvee Sheth** | [linkedin.com/in/rajvee-sheth](https://www.linkedin.com/in/rajvee-sheth) |
 | <img src="https://github.com/user-attachments/assets/0489b854-3c8e-479e-9aee-2e1c18b8ee0f" width="75" style="border-radius: 8px;" /> | **Shubh Nisar** | [shubh-nisar.github.io](https://shubh-nisar.github.io) |
