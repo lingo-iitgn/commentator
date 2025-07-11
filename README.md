@@ -233,21 +233,21 @@ e. Stop Docker Container by Container ID.
     ```
 - B. MongoDB Connection Error
 
-    Ensure MongoDB is running on the specified connection string
+    *Ensure MongoDB is running on the specified connection string*
 
 - C. Docker Build Failed
 
-    Check Docker daemon is running and Dockerfile syntax is correct
+  *Check Docker daemon is running and Dockerfile syntax is correct*
 
 - D. Frontend Build Error
 
-    Delete the node_modules folder and reinstall: 
+    *Delete the node_modules folder and reinstall:* 
     ```
      rm -rf node_modules && npm install
     ```
 - E. Backend Build Error
 
-    Ensure all dependencies in requirements.txt are correctly installed.
+    *Ensure all dependencies in requirements.txt are correctly installed.*
 
 ---
 
