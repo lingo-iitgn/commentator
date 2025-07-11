@@ -93,8 +93,11 @@ It provides both annotator interface for efficient annotatation and admin interf
 Prerequisites
 
 > Python 3.9+
+
 > Node.js 14+
+
 > MongoDB
+
 > Docker (optional)
 
 
