@@ -105,30 +105,6 @@ Prerequisites
 git clone https://github.com/lingo-iitgn/commentator.git
 cd commentator
 ```
-### 🔧 Troubleshooting (Common Issues)
-
-
-a. Port Already in Use
-```
-bash# Kill process on port 5000
-lsof -ti:5000 | xargs kill -9
-```
-b. MongoDB Connection Error
-```
-Ensure MongoDB is running on the specified connection string
-```
-c. Docker Build Failed
-```
-Check Docker daemon is running and Dockerfile syntax is correct
-```
-d. Frontend Build Error
-```
-Delete node_modules and run npm install again
-```
-e. Backend Build Error
-```
-Ensure all dependencies from requirements.txt file are properly installed
-```
 
 ### 🖥️ Backend [ Local Server ] 
 
@@ -233,7 +209,31 @@ e. Stop Docker Container by Container ID.
 
     docker stop <CONTAINER_ID>
 
+### 🔧 Troubleshooting (Common Issues)
+
+A. Port Already in Use
+```
+bash# Kill process on port 5000
+lsof -ti:5000 | xargs kill -9
+```
+B. MongoDB Connection Error
+```
+Ensure MongoDB is running on the specified connection string
+```
+C. Docker Build Failed
+```
+Check Docker daemon is running and Dockerfile syntax is correct
+```
+D. Frontend Build Error
+```
+Delete node_modules and run npm install again
+```
+E. Backend Build Error
+```
+Ensure all dependencies from requirements.txt file are properly installed
+```
 ---
+
 ## :link: Relevant Links 
 
 Paper Link: [`https://aclanthology.org/2024.emnlp-demo.11.pdf`](https://aclanthology.org/2024.emnlp-demo.11.pdf)
