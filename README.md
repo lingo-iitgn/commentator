@@ -48,8 +48,8 @@ It provides both annotator interface for efficient annotatation and admin interf
 
 ```
 ├── backend/
-│   ├── app.py                 # Flask application entry point
-│   ├── requirements.txt       # Python dependencies
+│   ├── app.py                # Flask application entry point
+│   ├── requirements.txt      # Python dependencies
 │   ├── Dockerfile            # Docker configuration
 │   └── LID_tool/             # Language identification modules
 ├── frontend/
@@ -58,9 +58,9 @@ It provides both annotator interface for efficient annotatation and admin interf
 │   │   ├── Auth/             # Authentication components
 │   │   ├── Components/       # Reusable UI components
 │   │   ├── Edit/             # Annotation editing interface
-│   │   ├── Matrix/           # Matrix analysis components
+│   │   ├── Matrix/           # Matrix analysis interface
 │   │   ├── POS/              # POS tagging interface
-│   │   ├── Home/             # Landing page components
+│   │   ├── Home/             # LID page interface
 │   │   ├── User/             # User management
 │   │   ├── utils/            # Utility functions
 │   │   └── Router.js         # Application routing
