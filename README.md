@@ -222,6 +222,7 @@ d. List of active docker containers
 e. Stop Docker Container by Container ID.
 
     docker stop <CONTAINER_ID>
+---
 
 ## 🔧 Troubleshooting (Common Issues)
 
