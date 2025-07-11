@@ -101,7 +101,7 @@ Prerequisites
 
 > Docker (optional)
 
-### Clone Repository
+#### Clone Repository
 ```
 git clone https://github.com/lingo-iitgn/commentator.git
 cd commentator
