@@ -233,11 +233,11 @@ e. Stop Docker Container by Container ID.
     ```
 - B. MongoDB Connection Error
 
-    *Ensure MongoDB is running on the specified connection string*
+    *Ensure MongoDB is running on the specified connection string.*
 
 - C. Docker Build Failed
 
-  *Check Docker daemon is running and Dockerfile syntax is correct*
+  *Check Docker daemon is running and Dockerfile syntax is correct.*
 
 - D. Frontend Build Error
 
