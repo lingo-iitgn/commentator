@@ -109,7 +109,7 @@ cd commentator
 
 ### 🖥️ Backend [ Local Server ] 
 
-##### ✅ Steps to Follow
+#### ✅ Steps to Follow
 
 a. Navigate inside backend folder
 
@@ -145,7 +145,7 @@ e. Running the local server
 
 ### 🖥️ Frontend [ Local Server ] 
 
-##### ✅ Steps to Follow
+#### ✅ Steps to Follow
 
 a. Navigate inside frontend folder
 
@@ -165,7 +165,7 @@ c. Start the frontend local server.
 
 ## 🔐 Administrative Configuration 
 
-##### ✅ Steps to Follow
+#### ✅ Steps to Follow
 
 1. **Start Frontend and Backend Servers**
    - Refer to the *Frontend Setup* section for frontend instructions.
@@ -188,7 +188,7 @@ c. Start the frontend local server.
 
 ## 🐳 Containerization of Backend using Docker 
 
-##### Steps to Follow
+#### ✅ Steps to Follow
 
 a. Creating a Docker Hub Account and a public repository
 
@@ -223,27 +223,27 @@ e. Stop Docker Container by Container ID.
 
     docker stop <CONTAINER_ID>
 
-### 🔧 Troubleshooting (Common Issues)
+## 🔧 Troubleshooting (Common Issues)
 
-- Port Already in Use
+- A. Port Already in Use
 ```
 bash# Kill process on port 5000
 lsof -ti:5000 | xargs kill -9
 ```
-- MongoDB Connection Error
+- B. MongoDB Connection Error
 ```
 Ensure MongoDB is running on the specified connection string
 ```
-- Docker Build Failed
+- C. Docker Build Failed
 ```
 Check Docker daemon is running and Dockerfile syntax is correct
 ```
-- Frontend Build Error
+- D. Frontend Build Error
 ```
 Delete the node_modules folder and reinstall: 
  rm -rf node_modules && npm install
 ```
-- Backend Build Error
+- E. Backend Build Error
 ```
 Ensure all dependencies in requirements.txt are correctly installed.
 ```
