@@ -253,11 +253,7 @@ Ensure all dependencies in requirements.txt are correctly installed.
 
 Paper Link: [`https://aclanthology.org/2024.emnlp-demo.11.pdf`](https://aclanthology.org/2024.emnlp-demo.11.pdf)
 
----
-
 Demo Video: [`https://bit.ly/commentator_video`](https://bit.ly/commentator_video)
-
----
 
 Project Website: [`https://lingo.iitgn.ac.in/codemixing/`](https://lingo.iitgn.ac.in/codemixing/)
 
