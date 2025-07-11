@@ -165,13 +165,26 @@ c. Start the frontend local server.
 
 ## 🔐 Administrative Configuration 
 
-##### Steps to Follow
+### ✅ Steps to Follow
 
-1. Start Frontend and Backend Local Server. (Refer 4.e & 5.c)
-2. Create an admin account.
-3. Open MongoDB database and set `admin=True` to create superuser/admin account.
-4. Login to Admin Dashboard.
-5. Upload sentences to the database (csv).
+1. **Start Frontend and Backend Servers**
+   - Refer to the [Frontend Setup](#frontend-local-server) section for frontend instructions.
+   - Refer to the [Backend Setup](#backend-local-server) section for backend setup.
+
+2. **Create an Admin Account**
+   - Register a new account through the application’s interface.
+
+3. **Set Admin Privileges in MongoDB**
+   - Access your MongoDB database.
+   - Locate the user document in the relevant collection.
+   - Update the user document to set `admin: true` to grant admin privileges for data management.
+
+4. **Log in to the Admin Dashboard**
+   - Use the admin account credentials to access the dashboard.
+
+5. **Upload Sentences to the Database**
+   - Use the admin dashboard to upload sentences via a `.csv` or `.txt` file.
+
 
 ## 🐳 Containerization of Backend using Docker 
 
@@ -227,11 +240,12 @@ Check Docker daemon is running and Dockerfile syntax is correct
 ```
 D. Frontend Build Error
 ```
-Delete node_modules and run npm install again
+Delete the node_modules folder and reinstall: 
+ rm -rf node_modules && npm install
 ```
 E. Backend Build Error
 ```
-Ensure all dependencies from requirements.txt file are properly installed
+Ensure all dependencies in requirements.txt are correctly installed.
 ```
 ---
 
