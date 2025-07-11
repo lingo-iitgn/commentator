@@ -105,9 +105,9 @@ Prerequisites
 git clone https://github.com/lingo-iitgn/commentator.git
 cd commentator
 ```
-### 🔧 Troubleshooting
+### 🔧 Troubleshooting (Common Issues)
 
-Common Issues
+
 a. Port Already in Use
 ```
 bash# Kill process on port 5000
