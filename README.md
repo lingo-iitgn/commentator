@@ -47,30 +47,26 @@ It provides both annotator interface for efficient annotatation and admin interf
 ## 📁 Folder Structure 
 
 ```
-backend
-	app.py
-	requirements.txt
-	Dockerfile
-	LID_tool
-fronend
-	build
-	node_modules
-	public
-	src
-		Admin
-		Auth
-		Components
-		Edit
-                Matrix
-                POS
-		Home
-		User
-		utils
-		Router.js
-	.env
-	.ignore
-	package-lock.json
-	package.json
+├── backend/
+│   ├── app.py                 # Flask application entry point
+│   ├── requirements.txt       # Python dependencies
+│   ├── Dockerfile            # Docker configuration
+│   └── LID_tool/             # Language identification modules
+├── frontend/
+│   ├── src/
+│   │   ├── Admin/            # Admin dashboard components
+│   │   ├── Auth/             # Authentication components
+│   │   ├── Components/       # Reusable UI components
+│   │   ├── Edit/             # Annotation editing interface
+│   │   ├── Matrix/           # Matrix analysis components
+│   │   ├── POS/              # POS tagging interface
+│   │   ├── Home/             # Landing page components
+│   │   ├── User/             # User management
+│   │   ├── utils/            # Utility functions
+│   │   └── Router.js         # Application routing
+│   ├── public/               # Static assets
+│   └── package.json          # Node.js dependencies
+└── README.md
 ```
 
 ##### frontend/src/.env
