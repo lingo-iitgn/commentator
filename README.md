@@ -168,7 +168,7 @@ c. Start the frontend local server.
 ### ✅ Steps to Follow
 
 1. **Start Frontend and Backend Servers**
-   - Refer to the [Frontend Setup](#frontend-local-server-) section for frontend instructions.
+   - Refer to the [Frontend Setup](#Frontend-Local-Server) section for frontend instructions.
    - Refer to the [Backend Setup](#backend-local-server) section for backend setup.
 
 2. **Create an Admin Account**
