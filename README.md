@@ -165,7 +165,7 @@ c. Start the frontend local server.
 
 ## 🔐 Administrative Configuration 
 
-### ✅ Steps to Follow
+##### ✅ Steps to Follow
 
 1. **Start Frontend and Backend Servers**
    - Refer to the *Frontend Setup* section for frontend instructions.
@@ -225,25 +225,25 @@ e. Stop Docker Container by Container ID.
 
 ### 🔧 Troubleshooting (Common Issues)
 
-A. Port Already in Use
+- Port Already in Use
 ```
 bash# Kill process on port 5000
 lsof -ti:5000 | xargs kill -9
 ```
-B. MongoDB Connection Error
+- MongoDB Connection Error
 ```
 Ensure MongoDB is running on the specified connection string
 ```
-C. Docker Build Failed
+- Docker Build Failed
 ```
 Check Docker daemon is running and Dockerfile syntax is correct
 ```
-D. Frontend Build Error
+- Frontend Build Error
 ```
 Delete the node_modules folder and reinstall: 
  rm -rf node_modules && npm install
 ```
-E. Backend Build Error
+- Backend Build Error
 ```
 Ensure all dependencies in requirements.txt are correctly installed.
 ```
