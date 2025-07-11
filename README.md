@@ -109,7 +109,7 @@ cd commentator
 
 ### 🖥️ Backend [ Local Server ] 
 
-##### Steps to Follow
+##### ✅ Steps to Follow
 
 a. Navigate inside backend folder
 
@@ -145,7 +145,7 @@ e. Running the local server
 
 ### 🖥️ Frontend [ Local Server ] 
 
-##### Steps to Follow
+##### ✅ Steps to Follow
 
 a. Navigate inside frontend folder
 
