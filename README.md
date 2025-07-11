@@ -100,6 +100,35 @@ Prerequisites
 
 > Docker (optional)
 
+### Clone Repository
+```
+git clone https://github.com/lingo-iitgn/commentator.git
+cd commentator
+```
+### 🔧 Troubleshooting
+
+Common Issues
+a. Port Already in Use
+```
+bash# Kill process on port 5000
+lsof -ti:5000 | xargs kill -9
+```
+b. MongoDB Connection Error
+```
+Ensure MongoDB is running on the specified connection string
+```
+c. Docker Build Failed
+```
+Check Docker daemon is running and Dockerfile syntax is correct
+```
+d. Frontend Build Error
+```
+Delete node_modules and run npm install again
+```
+e. Backend Build Error
+```
+Ensure all dependencies from requirements.txt file are properly installed
+```
 
 ### 🖥️ Backend [ Local Server ] 
 
