@@ -88,6 +88,16 @@ It provides both annotator interface for efficient annotatation and admin interf
 |  users     | Admin & Annotator Accounts                  |
 
 
+### 🚀 Quick Start
+
+Prerequisites
+
+Python 3.9+
+Node.js 14+
+MongoDB
+Docker (optional)
+
+
 ### 🖥️ Backend [ Local Server ] 
 
 ##### Steps to Follow
