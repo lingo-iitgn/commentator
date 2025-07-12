@@ -245,7 +245,7 @@ c. Start the frontend local server.
 
     *Delete the node_modules folder and reinstall:* 
     ```
-     rm -rf node_modules && npm install
+     rm -rf node_modules && npm install --legacy-peer-deps
     ```
 - E. Backend Build Error
 
