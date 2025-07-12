@@ -101,8 +101,9 @@ Prerequisites
 
 > **Docker** (optional)
 
-To get started with the project, follow these steps:
-#### Clone Repository
+**To get started with the project, follow these steps:**
+
+Clone the Repository:
 ```
 git clone https://github.com/lingo-iitgn/commentator.git
 cd commentator
