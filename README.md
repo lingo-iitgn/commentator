@@ -82,7 +82,7 @@ It provides both annotator interface for efficient and faster annotation and adm
 
 | Collection |        Description                          |
 | ---------- | ------------------------------------------- |
-|  lid       | LID based Language Identification of Tokens |
+|  lid       | Language Identification at Token level      |
 |  matrix    | Matrix based Identification of Sentences    |
 |  pos       | POS tags based Identification of Tokens     |
 |  sentences | Sentences to be annotated                   |
