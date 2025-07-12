@@ -107,6 +107,26 @@ git clone https://github.com/lingo-iitgn/commentator.git
 cd commentator
 ```
 
+### 🖥️ Frontend [ Local Server ] 
+
+#### ✅ Steps to Follow
+
+a. Navigate inside frontend folder
+
+    cd frontend
+
+b. Install all frontend dependencies post 1st application download.
+
+    npm i
+
+c. Start the frontend local server.
+
+    npm start
+
+> OR click on the frontend bash/shell file to run the frontend local server.
+
+---
+
 ### 🖥️ Backend [ Local Server ] 
 
 #### ✅ Steps to Follow
@@ -179,26 +199,6 @@ d. List of active docker containers
 e. Stop Docker Container by Container ID.
 
     docker stop <CONTAINER_ID>
----
-
-### 🖥️ Frontend [ Local Server ] 
-
-#### ✅ Steps to Follow
-
-a. Navigate inside frontend folder
-
-    cd frontend
-
-b. Install all frontend dependencies post 1st application download.
-
-    npm i
-
-c. Start the frontend local server.
-
-    npm start
-
-> OR click on the frontend bash/shell file to run the frontend local server.
-
 ---
 
 
