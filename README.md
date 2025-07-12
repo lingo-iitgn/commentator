@@ -93,13 +93,13 @@ It provides both annotator interface for efficient and faster annotation and adm
 
 Prerequisites
 
-> Python 3.9+
+> **Python 3.9.x or 3.10.x**
 
-> Node.js 12+
+> **Node.js 12+**
 
-> MongoDB
+> **MongoDB**
 
-> Docker (optional)
+> **Docker** (optional)
 
 #### Clone Repository
 ```
