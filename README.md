@@ -143,49 +143,6 @@ e. Running the local server
 
 ---
 
-### 🖥️ Frontend [ Local Server ] 
-
-#### ✅ Steps to Follow
-
-a. Navigate inside frontend folder
-
-    cd frontend
-
-b. Install all frontend dependencies post 1st application download.
-
-    npm i
-
-c. Start the frontend local server.
-
-    npm start
-
-> OR click on the frontend bash/shell file to run the frontend local server.
-
----
-
-## 🔐 Administrative Configuration 
-
-#### ✅ Steps to Follow
-
-1. **Start Frontend and Backend Servers**
-   - Refer to the *Frontend Setup* section for frontend instructions.
-   - Refer to the *Backend Setup* section for backend setup.
-
-2. **Create an Admin Account**
-   - Register a new account through the application’s interface.
-
-3. **Set Admin Privileges in MongoDB**
-   - Access your MongoDB database.
-   - Locate the user document in the relevant collection.
-   - Update the user document to set `admin: true` to grant admin privileges for data management.
-
-4. **Log in to the Admin Dashboard**
-   - Use the admin account credentials to access the dashboard.
-
-5. **Upload Sentences to the Database**
-   - Use the admin dashboard to upload sentences via a `.csv` or `.txt` file.
-
-
 ## 🐳 Containerization of Backend using Docker 
 
 #### ✅ Steps to Follow
@@ -222,6 +179,51 @@ d. List of active docker containers
 e. Stop Docker Container by Container ID.
 
     docker stop <CONTAINER_ID>
+---
+
+### 🖥️ Frontend [ Local Server ] 
+
+#### ✅ Steps to Follow
+
+a. Navigate inside frontend folder
+
+    cd frontend
+
+b. Install all frontend dependencies post 1st application download.
+
+    npm i
+
+c. Start the frontend local server.
+
+    npm start
+
+> OR click on the frontend bash/shell file to run the frontend local server.
+
+---
+
+
+## 🔐 Administrative Configuration 
+
+#### ✅ Steps to Follow
+
+1. **Start Frontend and Backend Servers**
+   - Refer to the *Frontend Setup* section for frontend instructions.
+   - Refer to the *Backend Setup* section for backend setup.
+
+2. **Create an Admin Account**
+   - Register a new account through the application’s interface.
+
+3. **Set Admin Privileges in MongoDB**
+   - Access your MongoDB database.
+   - Locate the user document in the relevant collection.
+   - Update the user document to set `admin: true` to grant admin privileges for data management.
+
+4. **Log in to the Admin Dashboard**
+   - Use the admin account credentials to access the dashboard.
+
+5. **Upload Sentences to the Database**
+   - Use the admin dashboard to upload sentences via a `.csv` or `.txt` file.
+
 ---
 
 ## 🔧 Troubleshooting (Common Issues)
