@@ -101,6 +101,7 @@ Prerequisites
 
 > **Docker** (optional)
 
+To get started with the project, follow these steps:
 #### Clone Repository
 ```
 git clone https://github.com/lingo-iitgn/commentator.git
