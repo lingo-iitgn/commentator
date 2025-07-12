@@ -95,7 +95,7 @@ Prerequisites
 
 > Python 3.9+
 
-> Node.js 14+
+> Node.js 12+
 
 > MongoDB
 
