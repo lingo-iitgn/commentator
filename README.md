@@ -115,36 +115,30 @@ e. Running the local server
     python app.py
     OR
     python3 app.py
-
+    
 ---
 
 ### Frontend [ Local Server ] 
 
 #### Steps to Follow
 
-a. Navigate inside frontend folder
-
-    cd frontend
-
-b. Install all frontend dependencies post 1st application download.
-
-    npm i
-
-c. Start the frontend local server.
-
-    npm start
-    
-##### Update app.py with your MongoDB and frontend URLs:
-
-    FLASK_APP=app.py
-    MONGODB_URL= "mongodb://127.0.0.1:27017/"
-    FRONTEND_URL= "http://localhost:3003"
-
-##### Update frontend/src/.env with your backend URL:
+a. Update frontend/src/.env with your backend URL:
 
     REACT_APP_BACKEND_URL=http://<YOUR_BACKEND_IP_ADDRESS>:5000
     OR
     REACT_APP_BACKEND_URL=http://localhost:5000
+
+b. Navigate inside frontend folder
+
+    cd frontend
+
+c. Install all frontend dependencies post 1st application download.
+
+    npm i 
+
+d. Start the frontend local server.
+
+    npm start
 
 ---
 
