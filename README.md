@@ -23,8 +23,6 @@ This GUI annotation tool is built with a ReactJS frontend, a Flask backend, and 
 
 To extend COMMENTATOR, refer to the `Configuration Changes` file in the **Documents** folder.
 
----
-
 <section>
   <div align="center"> 
 <!--       <img src="static/images/image.png" alt="MY ALT TEXT"/>
