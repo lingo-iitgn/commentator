@@ -199,7 +199,7 @@ E. List of active docker containers
 
     docker ps
 
-E. Stop Docker Container by Container ID.
+F. Stop Docker Container by Container ID.
 
     docker stop <CONTAINER_ID>
 ---
