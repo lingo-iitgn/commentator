@@ -25,6 +25,19 @@ To extend Commentator, refer to the `Configuration Changes` file in the **Docume
 
 ---
 
+<section>
+  <div align="center"> 
+<!--       <img src="static/images/image.png" alt="MY ALT TEXT"/>
+      <img src="static/images/image.png" alt="MY ALT TEXT"/> -->
+      <img width="692" height="442" alt="arch" src="https://github.com/user-attachments/assets/a3d30927-83de-413f-9478-3f6c230dfa36" />
+      <h3 class="subtitle has-text-centered">
+        Architecture: <strong>COMMENTATOR</strong> features two primary user workflows: <b>Admin workflow</b> and <b>Annotation workflow</b>. The Admin workflow manages user access, system configurations, and monitoring of annotation progress, while the Annotation workflow allows annotators to log in, annotate text, and review their annotation history. Both workflows are integrated into the tool’s modular architecture for efficient management and processing.
+      </h3>
+    </div>
+  </div>
+</section>
+
+---
 ## 📁 Folder Structure 
 
 ```
