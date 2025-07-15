@@ -39,6 +39,7 @@ To extend COMMENTATOR, refer to the `Configuration Changes` file in the **Docume
 ## 📁 Folder Structure 
 
 ```
+COMMENTATOR/
 ├── backend/
 │   ├── app.py                # Flask application entry point
 │   ├── requirements.txt      # Python dependencies
@@ -136,6 +137,11 @@ c. Start the frontend local server.
 > OR click on the frontend bash/shell file to run the frontend local server.
 
 ---
+##### backend
+
+    FLASK_APP=app.py
+    MONGODB_URL= "mongodb://127.0.0.1:27017/"
+    FRONTEND_URL= "http://localhost:3003"
 
 ##### frontend/src/.env
 
