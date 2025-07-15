@@ -25,26 +25,6 @@ To extend Commentator, refer to the `Configuration Changes` file in the **Docume
 
 ---
 
-## 👩‍💻 Interfaces 
-
-It provides both annotator interface for efficient and faster annotation and admin interface for result export and analysis.
-
-### 👤 Annotator
-
-1. Sign up to create an account  
-2. Log in using your credentials
-
-> **Demo Credentials**  
-> `username: commentator`  
-> `password: commentator`
-
-### 🔑 Admin Access
-
-> `username: admin`  
-> `password: admin`
-
----
-
 ## 📁 Folder Structure 
 
 ```
@@ -69,25 +49,6 @@ It provides both annotator interface for efficient and faster annotation and adm
 │   └── package.json          # Node.js dependencies
 └── README.md
 ```
-
-##### frontend/src/.env
-
-    REACT_APP_BACKEND_URL=http://<YOUR_BACKEND_IP_ADDRESS>:5000
-    OR
-    REACT_APP_BACKEND_URL=http://localhost:5000
-
----
-
-## 📦 Database Schemas
-
-| Collection |        Description                          |
-| ---------- | ------------------------------------------- |
-|  lid       | Language Identification at Token level      |
-|  matrix    | Matrix based Identification of Sentences    |
-|  pos       | POS tags based Identification of Tokens     |
-|  sentences | Sentences to be annotated                   |
-|  users     | Admin & Annotator Accounts                  |
-
 
 ### 🚀 Quick Start
 
@@ -145,6 +106,58 @@ e. Running the local server
 
 ---
 
+### 🖥️ Frontend [ Local Server ] 
+
+#### ✅ Steps to Follow
+
+a. Navigate inside frontend folder
+
+    cd frontend
+
+b. Install all frontend dependencies post 1st application download.
+
+    npm i
+
+c. Start the frontend local server.
+
+    npm start
+
+> OR click on the frontend bash/shell file to run the frontend local server.
+
+---
+
+##### frontend/src/.env
+
+    REACT_APP_BACKEND_URL=http://<YOUR_BACKEND_IP_ADDRESS>:5000
+    OR
+    REACT_APP_BACKEND_URL=http://localhost:5000
+
+---
+
+## 🔐 Administrative Configuration 
+
+#### ✅ Steps to Follow
+
+1. **Start Frontend and Backend Servers**
+   - Refer to the *Frontend Setup* section for frontend instructions.
+   - Refer to the *Backend Setup* section for backend setup.
+
+2. **Create an Admin Account**
+   - Register a new account through the application’s interface.
+
+3. **Set Admin Privileges in MongoDB**
+   - Access your MongoDB database.
+   - Locate the user document in the relevant collection.
+   - Update the user document to set `admin: true` to grant admin privileges for data management.
+
+4. **Log in to the Admin Dashboard**
+   - Use the admin account credentials to access the dashboard.
+
+5. **Upload Sentences to the Database**
+   - Use the admin dashboard to upload sentences via a `.csv` or `.txt` file.
+
+---
+
 ## 🐳 Containerization of Backend using Docker 
 
 #### ✅ Steps to Follow
@@ -183,51 +196,6 @@ e. Stop Docker Container by Container ID.
     docker stop <CONTAINER_ID>
 ---
 
-### 🖥️ Frontend [ Local Server ] 
-
-#### ✅ Steps to Follow
-
-a. Navigate inside frontend folder
-
-    cd frontend
-
-b. Install all frontend dependencies post 1st application download.
-
-    npm i
-
-c. Start the frontend local server.
-
-    npm start
-
-> OR click on the frontend bash/shell file to run the frontend local server.
-
----
-
-
-## 🔐 Administrative Configuration 
-
-#### ✅ Steps to Follow
-
-1. **Start Frontend and Backend Servers**
-   - Refer to the *Frontend Setup* section for frontend instructions.
-   - Refer to the *Backend Setup* section for backend setup.
-
-2. **Create an Admin Account**
-   - Register a new account through the application’s interface.
-
-3. **Set Admin Privileges in MongoDB**
-   - Access your MongoDB database.
-   - Locate the user document in the relevant collection.
-   - Update the user document to set `admin: true` to grant admin privileges for data management.
-
-4. **Log in to the Admin Dashboard**
-   - Use the admin account credentials to access the dashboard.
-
-5. **Upload Sentences to the Database**
-   - Use the admin dashboard to upload sentences via a `.csv` or `.txt` file.
-
----
-
 ## 🔧 Troubleshooting (Common Issues)
 
 - A. Port Already in Use
@@ -252,6 +220,38 @@ c. Start the frontend local server.
 - E. Backend Build Error
 
     *Ensure all dependencies in requirements.txt are correctly installed.*
+
+---
+
+## 👩‍💻 Interfaces 
+
+It provides both annotator interface for efficient and faster annotation and admin interface for result export and analysis.
+
+### 👤 Annotator
+
+1. Sign up to create an account  
+2. Log in using your credentials
+
+> **Demo Credentials**  
+> `username: commentator`  
+> `password: commentator`
+
+### 🔑 Admin Access
+
+> `username: admin`  
+> `password: admin`
+
+---
+
+## 📦 Database Schemas
+
+| Collection |        Description                          |
+| ---------- | ------------------------------------------- |
+|  lid       | Language Identification at Token level      |
+|  matrix    | Matrix based Identification of Sentences    |
+|  pos       | POS tags based Identification of Tokens     |
+|  sentences | Sentences to be annotated                   |
+|  users     | Admin & Annotator Accounts                  |
 
 ---
 
