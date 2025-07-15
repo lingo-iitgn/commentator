@@ -1,4 +1,4 @@
-# Commentator :writing_hand:: A Code-mixed Multilingual Text Annotation Framework.
+# COMMENTATOR :writing_hand:: A Code-mixed Multilingual Text Annotation Framework.
 <!--   <a href="https://lingo.iitgn.ac.in/codemixing/">
     <img alt="Website" src="https://img.shields.io/badge/Project-Website-brightgreen">
   </a> -->
@@ -21,7 +21,7 @@ A code-mixed annotation tool designed to significantly enhance annotation qualit
 
 This GUI annotation tool is built with a ReactJS frontend, a Flask backend, and uses MongoDB for data storage.
 
-To extend Commentator, refer to the `Configuration Changes` file in the **Documents** folder.
+To extend COMMENTATOR, refer to the `Configuration Changes` file in the **Documents** folder.
 
 ---
 
