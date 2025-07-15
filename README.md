@@ -277,11 +277,11 @@ It provides both annotator interface for efficient and faster annotation and adm
 
 ## :link: Relevant Links 
 
-Paper Link: [`https://aclanthology.org/2024.emnlp-demo.11.pdf`](https://aclanthology.org/2024.emnlp-demo.11.pdf)
+Paper Link: [`EMNLP 2024 Demo Paper`](https://aclanthology.org/2024.emnlp-demo.11.pdf)
 
-Demo Video: [`https://bit.ly/commentator_video`](https://bit.ly/commentator_video)
+Demostration: [`Demo Video`](https://bit.ly/commentator_video)
 
-Project Website: [`https://lingo.iitgn.ac.in/codemixing/`](https://lingo.iitgn.ac.in/codemixing/)
+Explore the Project: [`Project Website`](https://lingo.iitgn.ac.in/codemixing/)
 
 ---
 
