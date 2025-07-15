@@ -61,7 +61,7 @@ To extend COMMENTATOR, refer to the `Configuration Changes` file in the **Docume
 └── README.md
 ```
 
-### 🚀 Quick Start
+### Quick Start
 
 Prerequisites
 
@@ -81,9 +81,9 @@ git clone https://github.com/lingo-iitgn/commentator.git
 cd commentator
 ```
 
-### 🖥️ Backend [ Local Server ] 
+### Backend [ Local Server ] 
 
-#### ✅ Steps to Follow
+#### Steps to Follow
 
 a. Navigate inside backend folder
 
@@ -117,9 +117,9 @@ e. Running the local server
 
 ---
 
-### 🖥️ Frontend [ Local Server ] 
+### Frontend [ Local Server ] 
 
-#### ✅ Steps to Follow
+#### Steps to Follow
 
 a. Navigate inside frontend folder
 
@@ -147,7 +147,7 @@ c. Start the frontend local server.
 
 ## 🔐 Administrative Configuration 
 
-#### ✅ Steps to Follow
+#### Steps to Follow
 
 1. **Start Frontend and Backend Servers**
    - Refer to the *Frontend Setup* section for frontend instructions.
@@ -171,7 +171,7 @@ c. Start the frontend local server.
 
 ## 🐳 Containerization of Backend using Docker 
 
-#### ✅ Steps to Follow
+#### Steps to Follow
 
 a. Creating a Docker Hub Account and a public repository
 
