@@ -12,25 +12,28 @@
 </div>
 
 
-### Overview: 
-A code-mixed annotation tool designed to significantly enhance annotation quality and efficiency. It reduces annotation time and operational overheads by providing advanced features tailored for code-mixed data. The tool offers intuitive interfaces, automated suggestions, and robust error-checking mechanisms.
+**COMMENTATOR** is a code-mixed annotation tool designed to enhance the quality and efficiency of annotating multilingual, code-mixed text. It reduces annotation time and operational overheads by providing advanced features tailored for code-mixed data. The tool offers intuitive interfaces, automated suggestions, and robust error-checking mechanisms.
 
-- Specifically designed for annotating code-mixed text.
-- Easy extensibility to other code-mixed language pairs such as Gujarati-English, Marathi-English etc., In order to extend COMMENTATOR, please read the Configuration Changes file in the Documents section of this repository.
+### 🌟 Features
+
+- Modular Workflows: Supports Admin Workflow (user management, system configuration, progress monitoring) and Annotation Workflow (text annotation, history review).
+
+- User-Friendly Interface: Intuitive UI for annotators and admins.
+
+- Scalable Architecture: Built with ReactJS, Flask, and MongoDB for robust performance.
+
+- Extensibility: Easily extend to new language pairs, refer to the `Configuration Changes` file in the **Documents** folder.
+
 - For more details, please refer to [`our paper (EMNLP 2024:demo)`](https://aclanthology.org/2024.emnlp-demo.11.pdf).
-
-This GUI annotation tool is built with a ReactJS frontend, a Flask backend, and uses MongoDB for data storage.
-
-To extend COMMENTATOR, refer to the `Configuration Changes` file in the **Documents** folder.
 
 <section>
   <div align="center"> 
 <!--       <img src="static/images/image.png" alt="MY ALT TEXT"/>
       <img src="static/images/image.png" alt="MY ALT TEXT"/> -->
       <img width="692" height="442" alt="arch" src="https://github.com/user-attachments/assets/a3d30927-83de-413f-9478-3f6c230dfa36" />
-      <h3 class="subtitle has-text-centered">
+      <h4 class="subtitle has-text-centered">
         Architecture: <strong>COMMENTATOR</strong> features two primary user workflows: <b>Admin workflow</b> and <b>Annotation workflow</b>. The Admin workflow manages user access, system configurations, and monitoring of annotation progress, while the Annotation workflow allows annotators to log in, annotate text, and review their annotation history. Both workflows are integrated into the tool’s modular architecture for efficient management and processing.
-      </h3>
+      </h4>
     </div>
   </div>
 </section>
@@ -62,7 +65,7 @@ COMMENTATOR/
 └── README.md
 ```
 
-### Quick Start
+### ⚡ Quick Start
 
 Prerequisites
 
