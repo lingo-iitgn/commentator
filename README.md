@@ -170,11 +170,11 @@ d. Start the frontend local server.
 
 #### Steps to Follow
 
-a. Creating a Docker Hub Account and a public repository
+A. Creating a Docker Hub Account and a public repository
 
 > Visit https://hub.docker.com/
 
-b. Updating Dockerfile
+B. Updating Dockerfile
 
     FROM python:3.9-slim-buster
     WORKDIR /commentator
@@ -185,47 +185,47 @@ b. Updating Dockerfile
     CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
     EXPOSE 5000/tcp
 
-b. Push Image to Docker Hub
+C. Push Image to Docker Hub
 
     docker build . -t python-docker
     docker tag python-docker <DOCKER_USERNAME>/<REPOSITORY_NAME>
     docker push <DOCKER_USERNAME>/<REPOSITORY_NAME>
 
-c. Run Docker server on port 5000
+D. Run Docker server on port 5000
 
     docker run -dp 5000:5000 <DOCKER_USERNAME>/<REPOSITORY_NAME>
 
-d. List of active docker containers
+E. List of active docker containers
 
     docker ps
 
-e. Stop Docker Container by Container ID.
+E. Stop Docker Container by Container ID.
 
     docker stop <CONTAINER_ID>
 ---
 
 ## 🔧 Troubleshooting (Common Issues)
 
-- A. Port Already in Use
+- 1. Port Already in Use
     ```
     bash# Kill process on port 5000
     lsof -ti:5000 | xargs kill -9
     ```
-- B. MongoDB Connection Error
+- 2. MongoDB Connection Error
 
     *Ensure MongoDB is running on the specified connection string.*
 
-- C. Docker Build Failed
+- 3. Docker Build Failed
 
   *Check Docker daemon is running and Dockerfile syntax is correct.*
 
-- D. Frontend Build Error
+- 4. Frontend Build Error
 
     *Delete the node_modules folder and reinstall:* 
     ```
      rm -rf node_modules && npm install --legacy-peer-deps
     ```
-- E. Backend Build Error
+- 5. Backend Build Error
 
     *Ensure all dependencies in requirements.txt are correctly installed.*
 
