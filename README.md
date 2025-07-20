@@ -68,7 +68,7 @@ Prerequisites
 
 > **Python 3.9.x or 3.10.x**
 
-> **Node.js 12+**
+> **Node.js 12+** [`Download Node.js`](https://nodejs.org/en/download/)
 
 > **MongoDB**
 
