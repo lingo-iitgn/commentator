@@ -123,7 +123,16 @@ Choose one of the following options depending on your setup:
     conn_str = "mongodb+srv://<username>:<password>@cluster0.stlpmgf.mongodb.net/?retryWrites=true&w=majority"
 
 
-e. Running the local server
+e.  Set the database name:
+
+> If you want to Change or modify to a specific database, update this line in `app.py`:
+
+    database = client['sentences_EMNLP24']
+    
+Replace 'sentences_EMNLP24' with your preferred database name as needed.
+
+
+f. Running the local server
 
     python app.py
     OR
