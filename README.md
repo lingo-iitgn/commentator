@@ -104,19 +104,19 @@ c. Updating Frontend URL
 
 d.  Set up MongoDB connection in `app.py`
 
->  Choose one of the following options depending on your setup:
-   For Local Setup:
+Choose one of the following options depending on your setup:
+>  For Local Setup:
    Ensure MongoDB is running locally, and set:
 
     conn_str = YOUR_MONGODB_URL
     OR
     conn_str = "mongodb://127.0.0.1:27017/"
 
-   For Cloud MongoDB (Atlas):
-   Create an account:
-   👉 [`https://cloud.mongodb.com/`](https://cloud.mongodb.com/)
+> For Cloud MongoDB (Atlas):
+  Create an account:
+  👉 [`https://cloud.mongodb.com/`](https://cloud.mongodb.com/)
     
-   Set up your Cluster, Database, and User.
+  Set up your Cluster, Database, and User.
     
     Copy your connection string and replace credentials:
 
