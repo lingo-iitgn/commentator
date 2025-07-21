@@ -129,7 +129,7 @@ e.  Set the database name:
 
     database = client['sentences_EMNLP24']
     
-Replace 'sentences_EMNLP24' with your preferred database name as needed.
+   Replace 'sentences_EMNLP24' with your preferred database name as needed.
 
 
 f. Running the local server
