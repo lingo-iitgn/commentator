@@ -80,6 +80,28 @@ def register():
         return jsonify({'result': result})
 
 
+def init_db():
+    user_collection = database["users"]
+    
+    predefined_users = [
+        {
+            "username": "admin",
+            "password": sha256_crypt.encrypt("admin"),
+            "admin": True
+        },
+        {
+            "username": "commentator",
+            "password": sha256_crypt.encrypt("commentator"),
+            "admin": False
+        }
+    ]
+    
+    for user in predefined_users:
+        if not user_collection.find_one({"username": user["username"]}):
+            user_collection.insert_one(user)
+            print(f"Created predefined user: {user['username']}")
+
+
 @app.route('/login', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def login():
@@ -1084,5 +1106,6 @@ def all_pos_sentence():
     return jsonify({'result': pos_tags_range})
 
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True, host='0.0.0.0', port=5000)
 
