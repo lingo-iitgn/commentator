@@ -277,15 +277,15 @@ It provides both annotator interface for efficient and faster annotation and adm
 
 ## 📦 Database Schemas
 
-| Collection |        Description                          |
-| ---------- | ------------------------------------------- |
-|  lid       | Language Identification at Token level      |
-|  matrix    | Matrix based Identification of Sentences    |
-|  pos       | POS tags based Identification of Tokens     |
-|  ner       | NER entity based Identification of Tokens   |
-|  translate | Parallel Translation of sentences           |
-|  sentences | Sentences to be annotated                   |
-|  users     | Admin & Annotator Accounts                  |
+| Collection |        Description                              |
+| ---------- | ------------------------------------------------|
+|  lid       | Language Identification at Token level          |
+|  matrix    | Matrix based Identification of Sentences        |
+|  pos       | POS tags based Identification of Tokens         |
+|  ner       | Named Entity Recognition of Tokens              |
+|  translate | Sentence-level Translation to Target Language   |
+|  sentences | Sentences to be annotated                       |
+|  users     | Admin & Annotator Accounts                      |
 
 ---
 
