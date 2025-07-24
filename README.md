@@ -54,6 +54,8 @@ COMMENTATOR/
 │   │   ├── Matrix/           # Matrix analysis interface
 │   │   ├── POS/              # POS tagging interface
 │   │   ├── Home/             # LID page interface
+│   │   ├── NER/              # Named Entity Recognition interface 
+│   │   ├── Translate/        # Translation interface 
 │   │   ├── User/             # User management
 │   │   ├── utils/            # Utility functions
 │   │   └── Router.js         # Application routing
@@ -280,6 +282,8 @@ It provides both annotator interface for efficient and faster annotation and adm
 |  lid       | Language Identification at Token level      |
 |  matrix    | Matrix based Identification of Sentences    |
 |  pos       | POS tags based Identification of Tokens     |
+|  ner       | NER entity based Identification of Tokens   |
+|  translate | Parallel Translation of sentences           |
 |  sentences | Sentences to be annotated                   |
 |  users     | Admin & Annotator Accounts                  |
 
