@@ -51,10 +51,10 @@ COMMENTATOR/
 │   │   ├── Auth/             # Authentication components
 │   │   ├── Components/       # Reusable UI components
 │   │   ├── Edit/             # Annotation editing interface
-│   │   ├── Matrix/           # Matrix analysis interface
-│   │   ├── POS/              # POS tagging interface
 │   │   ├── Home/             # LID page interface
-│   │   ├── NER/              # Named Entity Recognition interface 
+│   │   ├── Matrix/           # Matrix analysis interface
+│   │   ├── NER/              # NER interface 
+│   │   ├── POS/              # POS tagging interface
 │   │   ├── Translate/        # Translation interface 
 │   │   ├── User/             # User management
 │   │   ├── utils/            # Utility functions
