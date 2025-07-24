@@ -23,6 +23,8 @@
 - Scalable Architecture: Built with ReactJS, Flask, and MongoDB for robust performance.
 
 - Extensibility: Easily extend to new language pairs, refer to the `Configuration Changes` file in the **Documents** folder.
+  
+- Inter-Annotator Agreement Calculation: Supports agreement metrics such as Cohen’s Kappa (for two annotators) and Fleiss’ Kappa (for three or more annotators) to assess annotation consistency.
 
 - For more details, please refer to [`our paper (EMNLP 2024:demo)`](https://aclanthology.org/2024.emnlp-demo.11.pdf).
 
