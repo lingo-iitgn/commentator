@@ -100,7 +100,7 @@ c. Updating Frontend URL
 
     frontend = YOUR_FRONTEND_HOST_URL
     OR
-    frontend = http://localhost:3003
+    frontend = http://localhost:3000
 
 d.  Set up MongoDB connection in `app.py`
 
