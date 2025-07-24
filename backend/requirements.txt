@@ -39,3 +39,5 @@ platformdirs==2.5.1
 distlib==0.3.4
 filelock==3.6.0
 twitter-text-python==1.1.1
+groq==0.30.0
+statsmodels>=0.13.0
