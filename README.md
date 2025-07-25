@@ -322,8 +322,6 @@ It provides both annotator interface for efficient and faster annotation and adm
 
 Paper Link: [`EMNLP 2024 Demo Paper`](https://aclanthology.org/2024.emnlp-demo.11.pdf)
 
-Demostration: [`Demo Video`](https://bit.ly/commentator_video)
-
 Explore the Project: [`Project Website`](https://lingo.iitgn.ac.in/codemixing/)
 
 ---
