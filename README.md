@@ -286,7 +286,7 @@ F. Stop Docker Container by Container ID.
 
 ## 👩‍💻 Interfaces 
 
-It provides both annotator interface for efficient and faster annotation and admin interface for result export and analysis.
+COMMENTATOR provides both annotator interface for efficient and faster annotation and admin interface for result export and analysis. Once setup is done follow these steps:
 
 ### 👤 Annotator
 
