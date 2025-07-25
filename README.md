@@ -290,11 +290,11 @@ COMMENTATOR provides both annotator interface for efficient and faster annotatio
 
 1. Log in using the **Demo Credentials**
 
-    ### For Admin Access
+    ### 🔐 Admin Access
     
     > `username: admin`  
     > `password: admin`
-    ### 👤 For Annotator
+    ### 👤 Annotator
     
     > `username: commentator`  
     > `password: commentator`
