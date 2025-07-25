@@ -133,20 +133,11 @@ e.  Set the database name:
     
    Replace 'sentences_EMNLP24' with your preferred database name as needed.
 
+f.  API Configuration for the Translation task:
 
-f. Running the local server
+#### The backend supports three different AI providers for translation tasks. Configure the API keys based on your preferred provider:
 
-    python app.py
-    OR
-    python3 app.py
-    
----
-
-## 🔑 API Configuration for the Translation task
-
-The backend supports three different AI providers for translation tasks. Configure the API keys based on your preferred provider:
-
-#### Groq API Setup
+Groq API Setup
 Get your Groq API key from [`https://console.groq.com/keys`](https://console.groq.com/keys) and add it to the `.env` file in the backend directory:
 
 ```env
@@ -154,7 +145,7 @@ GROQ_API_KEY="YOUR_GROQ_API_KEY"
 ```
 > Model used: llama-3.3-70b-versatile (you can change this model in the code as needed)
 
-#### OpenAI API Setup (Optional)
+OpenAI API Setup (Optional)
 Get your OpenAI API key from [`https://platform.openai.com/api-keys`](https://platform.openai.com/api-keys). Then, uncomment the OpenAI API integration code in `app.py` and set your API key:
 
 ```
@@ -162,7 +153,7 @@ os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"
 ```
 > Model used: gpt-4 (you can change this model in the code as needed)
 
-#### Anthropic (Claude) API Setup (Optional)
+Anthropic (Claude) API Setup (Optional)
 Get your Anthropic API key from [`https://docs.anthropic.com/en/api/admin-api/apikeys/get-api-key`](https://docs.anthropic.com/en/api/admin-api/apikeys/get-api-key). Then, uncomment the Anthropic API integration code in `app.py` and set your API key:
 
 ```
@@ -172,6 +163,12 @@ os.environ["ANTHROPIC_API_KEY"] = "YOUR_ANTHROPIC_API_KEY"
 
 Note: You can configure multiple API providers, but ensure at least one is properly set up for the translation functionality to work correctly.
 
+g.  Running the local server
+
+    python app.py
+    OR
+    python3 app.py
+    
 ---
 
 ### Frontend [ Local Server ] 
