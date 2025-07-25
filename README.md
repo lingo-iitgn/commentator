@@ -257,7 +257,7 @@ F. Stop Docker Container by Container ID.
     docker stop <CONTAINER_ID>
 ---
 
-## 🔧 Troubleshooting (Common Issues)
+## ⚙️ Troubleshooting (Common Issues)
 
 - 1. Port Already in Use
     ```
