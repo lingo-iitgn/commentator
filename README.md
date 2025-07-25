@@ -288,19 +288,18 @@ F. Stop Docker Container by Container ID.
 
 COMMENTATOR provides both annotator interface for efficient and faster annotation and admin interface for result export and analysis. Once setup is done follow these steps:
 
-### 👤 Annotator
+1. Log in using the **Demo Credentials**
 
-1. Sign up to create an account  
-2. Log in using your credentials
+    ### For Admin Access
+    
+    > `username: admin`  
+    > `password: admin`
+    ### 👤 For Annotator
+    
+    > `username: commentator`  
+    > `password: commentator`
 
-> **Demo Credentials**  
-> `username: commentator`  
-> `password: commentator`
-
-For Admin Access
-
-> `username: admin`  
-> `password: admin`
+2. Sign up to create an account  
 
 ---
 
