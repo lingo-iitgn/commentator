@@ -8,20 +8,17 @@ import { useParams } from 'react-router-dom';
 
 // Components
 import Navbar from '../Components/Navbar';
-import LanguageBtn from '../Components/LanguageBtn';
 
 // Utils
 import LanguageDetect from '../utils/LanguageDetect';
 import EnglishSplitter from '../utils/EnglishSplitter';
 import HindiSplitter from '../utils/HindiSplitter';
-// import FetchSentence from '../utils/FetchEdit';
 
 import { StyledButton } from '../utils/styles';
 import Steps from '../Components/Steps';
 
-
 const FetchSentence = async (id_prop) => {
-    const id = JSON.parse(id_prop); // Assuming id_prop is already a JSON-parsed value
+    const id = JSON.parse(id_prop); 
     const data = {
         sentId: id, 
     };
@@ -32,7 +29,7 @@ const FetchSentence = async (id_prop) => {
         return res.data.result;
     } catch (error) {
         console.error('Error fetching sentence:', error);
-        throw error; // Rethrow the error to handle it in the caller function
+        throw error; 
     }
 };
 
@@ -63,7 +60,7 @@ const Edit = props => {
     const startTime = new Date();
 
     const {en, hi} = LanguageDetect(sentence.length > 0 ? sentence : "");
-   // console.log('en: ', en, 'hi: ', hi);
+    // console.log('en: ', en, 'hi: ', hi);
     const wordArr = (sent) => {
         if(en > hi){
             return (EnglishSplitter(sent));
@@ -73,61 +70,54 @@ const Edit = props => {
     };
     useEffect(() => {
         if(sentence.length > 0){
-            let {sent, links, hashs} = wordArr(sentence);
-            // console.log(sent);
-            // console.log(links);
-            // console.log(hashs);
+            let { links, hashs} = wordArr(sentence);
             setHypertext(links);
             setHashtags(hashs);
         }
     }, [sentence]);
 
-    // useEffect(() => {
-    //     console.log(hypertext);
-    // }, [hypertext]);
 
     const [tag, setTag] = useState([{index: 0, key: 'Hello', value: 'e'}]);
 
     useEffect(() => {
-        let resp;
         const getSentence = async (id_prop) => {
             const id = JSON.parse(id_prop);
             const data = {
                 id,
                 logged_in_user,
             };
-            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/get-edit-sentence`, {
-                method: "POST",
-                headers: {
-                    'Content-type': 'application-json',
-                    'Access-Control-Allow-Origin': '*',
-                },
-                body: JSON.stringify(data)
-            });
-            // console.log(res.data.result);
-            resp = res.data.result[2];
-            setSelected(res.data.result[0]);
+    
+            try {
+                const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/get-edit-sentence`, {
+                    method: "POST",
+                    headers: {
+                        'Content-type': 'application-json',
+                        'Access-Control-Allow-Origin': '*',
+                    },
+                    body: JSON.stringify(data)
+                });
+    
+                const sentTag = res.data.result;
+                console.log("Full backend result:", sentTag);
+                const tagData = Array.isArray(sentTag[1]) ? sentTag[1] : [];
 
-            console.log(resp);
-
-            setTag(resp);
+                console.log("Extracted tags:", tagData);
+                setTag(tagData);
+    
+                console.log("Extracted tags:", tagData);
+    
+                setTag(tagData);                
+                setSelected("edit");            
+            } catch (err) {
+                console.error("Fetch error:", err);
+                setTag([]);  
+            }
         };
-
-        const fetchLidData = async () => {
-            console.log(resp)
-
-            const lst = [];
-            let counter = 0;
-            resp.map(elem => lst.push({
-                key: elem[0],
-                value: elem[1],
-                index: counter++,
-            }));
-            setTag(lst);
-        };
-        // fetchLidData();
+    
         getSentence(sid);
     }, []);
+    
+
 
     useEffect(() => {
         console.log(selected);
@@ -143,10 +133,6 @@ const Edit = props => {
             return 'h';
         }
     };
-
-    // useEffect(() => {
-    //     console.log('TAG ARRAY: ', tag);
-    // }, [tag]);
 
     const updateTagForWord = word  => {
         let lst = [...tag];
@@ -170,7 +156,6 @@ const Edit = props => {
         setFeedbackVisible(false);
 
         const data = {
-            selected,
             tag,
             sentId,
             username,
@@ -200,6 +185,7 @@ const Edit = props => {
                     <StyledSentenceId>#{sentId}</StyledSentenceId>
                     <StyledSentenceContainer>
                         <StyledDisplaySentenceContainer>
+                            {/* <StyledSentence>नमस्ते, यह शुभ है। यह एक एनोटेशन टूल है।</StyledSentence> */}
                             <StyledSentence>{sentence}</StyledSentence>
                         </StyledDisplaySentenceContainer>
                     </StyledSentenceContainer>
@@ -210,7 +196,6 @@ const Edit = props => {
                         </StyledWordBreakup>
                         <StyledFlex>
                             {tag.map((elem, i) => {
-                                // console.log(selected, elem.value, selected === (elem.value));
                                 return (
                                     <StyledWord
                                         // style={{ backgroundColor: selected === elem.value ? 'green' : 'red' }}

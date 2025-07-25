@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
-
 import styled from 'styled-components';
 
 const LanguageBtn = ({ selected, setSelected }) => {
     return (
         <StyledFlexer>
-            <StyledEnBtn lang={selected} onClick={() => setSelected('e')}>English</StyledEnBtn>
-            <StyledHiBtn lang={selected} onClick={() => setSelected('h')}>Hindi</StyledHiBtn>
+            <StyledEnBtn lang={selected} onClick={() => setSelected('e')}>ENGLISH</StyledEnBtn>
+            <StyledHiBtn lang={selected} onClick={() => setSelected('h')}>HINDI</StyledHiBtn>
         </StyledFlexer>
     );
 };

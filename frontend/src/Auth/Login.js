@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 // Libs
 import styled from "styled-components";
@@ -56,18 +56,36 @@ const Login = (props) => {
         JSON.stringify(res.data.success.pos_id)
       );
     res.data.success &&
+      sessionStorage.setItem(
+        "ner_id",
+        JSON.stringify(res.data.success.ner_id)
+      );
+    res.data.success &&
     sessionStorage.setItem(
       "annote_admin",
       JSON.stringify(res.data.success.admin)
     );
-
+    res.data.success &&
+    sessionStorage.setItem(
+      "trans_id",
+      JSON.stringify(res.data.success.trans_id)
+    );
     console.log(res.data);
     if(res.data.success.admin){
       (res.data.success) && history('/admin')
     } else {
       (res.data.success) && history('/tasks');
     }
-
+    // fetch('/signup', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-type': 'application-json'
+    //     },
+    //     body: JSON.stringify(data)
+    //   })
+    //   .then(res => res.json())
+    //   .then(res => console.log(res))
+    //   .catch(err => console.log(err));
   };
 
   return (

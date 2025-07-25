@@ -53,12 +53,27 @@ const Navbar = () => {
                     </StyledUsername>
                 )}
             {!logged_in_admin && location.pathname === '/pos' && (
-                    <StyledUsername onClick={() => history('/profile1')}>
+                    <StyledUsername onClick={() => history('/Profilepos')}>
                         Edit Annotations
                     </StyledUsername>
             )}
-             {!logged_in_admin && location.pathname === '/matrix' && (
+            {!logged_in_admin && location.pathname === '/matrix' && (
                     <StyledUsername onClick={() => history('/Profilematrix')}>
+                        Edit Annotations
+                    </StyledUsername>
+            )}
+            {!logged_in_admin && location.pathname === '/ner' && (
+                    <StyledUsername onClick={() => history('/Profilener')}>
+                        Edit Annotations
+                    </StyledUsername>
+            )}
+            {!logged_in_admin && location.pathname === '/translate' && (
+                    <StyledUsername onClick={() => history('/Profiletranslate')}>
+                        Edit Annotations
+                    </StyledUsername>
+            )}
+            {!logged_in_admin && location.pathname === '/scn' && (
+                    <StyledUsername onClick={() => history('/Profilescn')}>
                         Edit Annotations
                     </StyledUsername>
             )}

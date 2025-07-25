@@ -75,13 +75,12 @@ const Home = props => {
         fetchData();
     }, []);
 
-    //const [selected, setSelected] = useState('');
     const startTime = new Date();
 
-    // const sentence = "Hi, this is USER. This is an Annotation tool.";
+    // const sentence = "Hi, this is Rajvee. This is an Annotation tool.";
+    // const sentence = "नमस्ते, यह राजवी है। यह एक एनोटेशन टूल है।";
 
     const { en, hi } = LanguageDetect(sentence.length > 0 ? sentence : "");
-    //console.log('en: ', en, 'hi: ', hi);
     const wordArr = (sent) => {
         if (en > hi) {
             return (EnglishSplitter(sent));
@@ -93,16 +92,12 @@ const Home = props => {
     useEffect(() => {
         if (sentence.length > 0) {
             let { sent, links, hashs } = wordArr(sentence);
-            // console.log(sent);
-            //console.log(links);
-            // console.log(hashs);
+    
             setWords(sent);
             setHypertext(links);
             setHashtags(hashs);
         }
     }, [sentence]);
-
-    //const [tag, setTag] = useState([]);
 
     const toggle = letter => {
         if (letter === 'h') {
@@ -115,9 +110,6 @@ const Home = props => {
         }
     };
 
-    // useEffect(() => {
-    //    console.log('TAG ARRAY: ', tag);
-    // }, [tag]);
 
     const updateTagForWord = word => {
         let lst = [...tag];
@@ -143,7 +135,6 @@ const Home = props => {
         let sentId = JSON.parse(sessionStorage.getItem('sentId'));
 
         const data = {
-            selected,
             tag,
             sentId,
             username,
@@ -197,6 +188,7 @@ const Home = props => {
                             {tag.map((elem, i) => {
                                 return (
                                     <StyledWord
+                                        // style={{ backgroundColor: selected === elem.value ? 'green' : 'red' }}
                                         lang={selected} individualTag={elem.value} key={elem.key} onClick={() => updateTagForWord(elem)}>{elem.key}</StyledWord>
                                 );
                             })}

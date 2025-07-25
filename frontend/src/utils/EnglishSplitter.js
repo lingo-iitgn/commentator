@@ -18,15 +18,15 @@ const EnglishSplitter = (sentence) => {
     const hashs = detectHashtags(sentence) ? detectHashtags(sentence) : [];
     //console.log(hashs);
     const links = detectURLs(sentence) ? detectURLs(sentence) : [];
-   // console.log(links);
+    //console.log(links);
     let sent = sentence;
 
     links.map(link => {
         sent = sent.replace(link, "");
     });
-   // console.log(sent)
+    //console.log(sent)
     sent = sent.match(/\b([\w+^']+)\b/g)
-   // console.log(sent);
+    //console.log(sent);
     return {sent, links, hashs};
 };
 

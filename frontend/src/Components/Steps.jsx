@@ -5,13 +5,14 @@ const Steps = () => {
     return (
         <StyledContainer>
             <StyledHeader>Steps to Follow!</StyledHeader>
-            <StyledSteps>1. Select the <b>individual word tags</b> for the sentence.</StyledSteps>
-            <StyledSteps>2. Individual word tags get colored according to the color convention below:</StyledSteps>
-            <StyledSteps>3. 'English' - green 🟢</StyledSteps>
-            <StyledSteps>4. 'Hindi' - yellow 🟡</StyledSteps>
-            <StyledSteps>5. 'Unidentified' - blue 🔵</StyledSteps>
-            <StyledSteps>6. If necessary, adjust the tags according to the context of the sentence.</StyledSteps>
-            <StyledSteps>7. Click "Submit" to save your changes and proceed to the next sentence.</StyledSteps>
+            <StyledSteps>1. Select the <b>Language</b> for the sentence.</StyledSteps>
+            <StyledSteps>2. The selected language turns purple.</StyledSteps>
+            <StyledSteps>3. Individual word tags get a default color.</StyledSteps>
+            <StyledSteps>4. You need to tag the words following below color convention</StyledSteps>
+            <StyledSteps>5. 'English' - green 🟢</StyledSteps>
+            <StyledSteps>6. 'Hindi' - yellow 🟡</StyledSteps>
+            <StyledSteps>7. 'Unidentified' - blue 🔵</StyledSteps>
+            <StyledSteps>8. Submit</StyledSteps>
         </StyledContainer>
     );
 };

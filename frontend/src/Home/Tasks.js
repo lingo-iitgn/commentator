@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import { StyledButton } from '../utils/styles';
 import { useNavigate } from 'react-router-dom';
 
 import Navbar from '../Components/Navbar';
@@ -15,10 +14,10 @@ const Tasks = () => {
 
     return (
         <StyledContainer>
-          <Navbar />
-            <Title>Choose any Task to proceed</Title>
+          <Navbar/>
+            <Title>Choose any task to proceed</Title>
             <Row>
-            <TaskContainer color="#FFECB3" onClick={() => navigateTo('/Intermediate')}>
+            <TaskContainer color="#FFECB3" onClick={() => navigateTo('/')}>
                     <AnimatedText>Token-level language Identification</AnimatedText>
                 </TaskContainer>
                 <TaskContainer color="#B2EBF2" onClick={() => navigateTo('/pos')}>
@@ -29,13 +28,13 @@ const Tasks = () => {
                 </TaskContainer>
             </Row>
             <Row>
-                <TaskContainer color="#F9CCCC" onClick={() => navigateTo('/task4')}>
+                <TaskContainer color="#F9CCCC" onClick={() => navigateTo('/ner')}>
                     <AnimatedText>Token-level entity labelling</AnimatedText>
                 </TaskContainer>
-                <TaskContainer color="#FFDAB9" onClick={() => navigateTo('/task5')}>
+                <TaskContainer color="#FFDAB9" onClick={() => navigateTo('/scn')}>
                     <AnimatedText>Spelling correction & normalization</AnimatedText>
                 </TaskContainer>
-                <TaskContainer color="#CE93D8" onClick={() => navigateTo('/task6')}>
+                <TaskContainer color="#CE93D8" onClick={() => navigateTo('/translate')}>
                     <AnimatedText>Translations</AnimatedText>
                 </TaskContainer>
 

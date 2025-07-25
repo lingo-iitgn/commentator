@@ -1,20 +1,20 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const POSRules = () => {
+const NERRules = () => {
     return (
         <StyledContainer>
             <StyledHeader>Steps to Follow!</StyledHeader>
-            <StyledSteps>1. Automatic POS Tags are assigned to every lexicon.</StyledSteps>
-            <StyledSteps>2. Update individual POS tags.</StyledSteps>
-            <StyledSteps>3. Click on the dropdown, a list of tags appear.</StyledSteps>
-            <StyledSteps>4. Choose the updated POS Tag.</StyledSteps>
+            <StyledSteps>1. Automatic NER Tags are assigned to every lexicon.</StyledSteps>
+            <StyledSteps>2. Update individual NER tags.</StyledSteps>
+            <StyledSteps>3. Click on the dropdown menu, a list of tags will appear.</StyledSteps>
+            <StyledSteps>4. Choose the updated NER Tag.</StyledSteps>
             <StyledSteps>5. Submit to load the next sentence.</StyledSteps>
         </StyledContainer>
     );
 };
 
-export default POSRules;
+export default NERRules;
 
 const StyledContainer = styled.div`
     width: 25%;

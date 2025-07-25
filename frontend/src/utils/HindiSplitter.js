@@ -2,6 +2,7 @@ const HindiSplitter = (sentence="नमस्ते, यह शुभ है। 
     let sent = sentence.replace(/,/g, "");
     sent = sent.replace(/;/g, "");
     sent = sent.replace(/।/g, "");
+    // console.log('CHAR: ', /[u{U+007C}]/);
 
     return sent.split(' ');
 };

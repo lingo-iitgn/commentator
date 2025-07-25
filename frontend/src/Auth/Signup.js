@@ -46,7 +46,6 @@ const Signup = props => {
             },
             body: JSON.stringify(data)
         });
-        // const resFinal = await res;
         console.log((res.data));
         history('/');
         // fetch('/signup', {

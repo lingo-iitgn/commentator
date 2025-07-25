@@ -13,10 +13,10 @@ const LanguageDetect = (sentence) => {
   val.map((elem) => {
     if (elem[0] === "english") {
       en = elem[1];
-      //console.log("En: ", elem[1]);
+      console.log("En: ", elem[1]);
     } else if (elem[0] === "hindi") {
       hi = elem[1];
-     // console.log("Hi: ", elem[1]);
+      console.log("Hi: ", elem[1]);
     }
   });
 

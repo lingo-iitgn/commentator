@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+
 
 // Components
 import Navbar from '../Components/Navbar';
 
 const Admin = () => {
+    const navigate = useNavigate();
     const [file, setFile] = useState();
     const [userList, setUserList] = useState([]);
-    const [fileType, setFileType] = useState('pos');
+    const [fileType, setFileType] = useState('lid');
     const [cmi, setCmi] = useState(0);
-    const [kappa, setKappa] = useState(0); // Define setKappa here
-
+    const [kappa, setKappa] = useState(0);
+    const [kappaType, setKappaType] = useState('cohen');
+    const [showThirdAnnotator, setShowThirdAnnotator] = useState(false);
+    
     useEffect(() => {
         const fetchUsernames = async () => {
             const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/fetch-users-list`, {
@@ -21,11 +25,35 @@ const Admin = () => {
                     'Access-Control-Allow-Origin': '*',
                 },
             });
-            setUserList(res.data.result);
+            const nonAdminUsers = res.data.result.filter(user => {
+                if (typeof user === 'string') return true;
+                if (typeof user === 'object') return !user.admin;
+                return true;
+            });
+            setUserList(nonAdminUsers);
         };
-
+    
         fetchUsernames();
     }, []);
+
+    const handleFileUpload = async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await axios.post(adminFileUpload, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            // On success, navigate to /admin
+            navigate('/admin');
+        } catch (error) {
+            console.error('File upload failed:', error);
+        }
+    };
 
     const handleDownload = async (e) => {
         e.preventDefault();
@@ -49,6 +77,12 @@ const Admin = () => {
         }
     };
 
+    const handleKappaTypeChange = (e) => {
+        const selectedType = e.target.value;
+        setKappaType(selectedType);
+        setShowThirdAnnotator(selectedType === 'fleiss');
+    };
+
     const adminFileUpload = process.env.REACT_APP_BACKEND_URL + '/admin-file-upload';
     const compareAnnotators = process.env.REACT_APP_BACKEND_URL + '/compare-annotators';
 
@@ -56,9 +90,10 @@ const Admin = () => {
         <div>
             <Navbar />
             <StyledFlexContainer>
-                <form method="POST" action={adminFileUpload} encType="multipart/form-data">
-                    <input type='file' name="file" onChange={e => setFile(e.target.files[0])} />
-                    <StyledButton type="submit">Submit</StyledButton>
+
+                <form onSubmit={handleFileUpload} encType="multipart/form-data">
+                <input type='file' name="file" onChange={e => setFile(e.target.files[0])} />
+                <StyledButton type="submit">Submit</StyledButton>
                 </form>
 
                 <StyledForm method="POST" encType="multipart/form-data" onSubmit={handleDownload}>
@@ -72,7 +107,9 @@ const Admin = () => {
                     <StyledTextInput as="select" name="file_type" onChange={e => setFileType(e.target.value)}>
                         <option value="lid">LID</option>
                         <option value="pos">POS</option>
-                        <option value="matrix">Matrix</option>
+                        <option value="matrix">MATRIX</option>
+                        <option value="ner">NER</option>
+                        <option value="translation">TRANSLATION</option>
                     </StyledTextInput>
 
                     <StyledKappa
@@ -87,43 +124,78 @@ const Admin = () => {
             </StyledFlexContainer>
 
             <StyledCompareForm method="POST" action={compareAnnotators} encType="multipart/form-data">
+                <StyledTitle>Inter Annotator Agreement</StyledTitle>
+                
+                {/* Kappa Type Selection */}
                 <StyledFlexRow>
-                    <StyledTextInput as="select" name="username1" placeholder='Enter username'>
+                    <StyledLabel>Kappa Type:</StyledLabel>
+                    <StyledTextInput 
+                        as="select" 
+                        name="kappa_type" 
+                        value={kappaType}
+                        onChange={handleKappaTypeChange}
+                        isCompareForm={true}
+                    >
+                        <option value="cohen">Cohen's Kappa </option>
+                        <option value="fleiss">Fleiss' Kappa </option>
+                    </StyledTextInput>
+                </StyledFlexRow>
+
+                {/* Annotator Selection */}
+                <StyledFlexRow>
+                    <StyledTextInput as="select" name="username1" placeholder='Select Annotator 1' required isCompareForm={true}>
+                        <option value="">Select Annotator 1</option>
                         {userList.map((elem, index) => (
                             <option key={index} value={elem} name="option_tag">{elem}</option>
                         ))}
                     </StyledTextInput>
 
-                    <StyledTextInput as="select" name="username2" placeholder='Enter username'>
+                    <StyledTextInput as="select" name="username2" placeholder='Select Annotator 2' required isCompareForm={true}>
+                        <option value="">Select Annotator 2</option>
                         {userList.map((elem, index) => (
                             <option key={index} value={elem} name="option_tag">{elem}</option>
                         ))}
                     </StyledTextInput>
 
+                    {kappaType === 'fleiss' && (
+                        <StyledTextInput as="select" name="username3" placeholder='Select Annotator 3' required isCompareForm={true}>
+                            <option value="">Select Annotator 3</option>
+                            {userList.map((elem, index) => (
+                                <option key={index} value={elem} name="option_tag">{elem}</option>
+                            ))}
+                        </StyledTextInput>
+                    )}
+                </StyledFlexRow>
+
+                <StyledFlexRow>
                     <StyledKappa
                         name="kappa"
-                        type='text'
-                        placeholder='Enter Kappa Threshold'
+                        type='number'
+                        step="0.01"
+                        min="0"
+                        max="1"
+                        placeholder='Enter Kappa Threshold (0-1)'
                         onChange={(e) => setKappa(e.target.value)}
                         required
+                        isCompareForm={true}
                     />
                 </StyledFlexRow>
-                <StyledButton type="submit">Download Comparison CSV</StyledButton>
+                <StyledInfo>
+                    {kappaType === 'cohen' 
+                        ? "Cohen's Kappa: Measures agreement between exactly two annotators" 
+                        : "Fleiss' Kappa: Measures agreement among three annotators (requires 3 annotators)"
+                    }
+                </StyledInfo>
+
+                <StyledButton type="submit" isCompareForm={true}>
+                    Download IAA Results ({kappaType === 'cohen' ? "Cohen's" : "Fleiss'"} Kappa)
+                </StyledButton>
             </StyledCompareForm>
         </div>
     );
 };
+
 export default Admin;
-
-const styledButton = {
-    color: '#fff',
-};
-
-const styledForm = {
-    border: '2px solid #efefef',
-    padding: '20px',
-    borderRadius: '12px'
-};
 
 const StyledForm = styled.form`
     border: 2px solid #efefef;
@@ -146,7 +218,8 @@ const StyledTextInput = styled.select`
     border: 2px solid #efefef;
     margin: 0px 8px;
     border-radius: 4px;
-    width: 200px;
+    width: ${props => props.isCompareForm ? '250px' : '200px'};
+    font-size: 14px;
 `;
 
 const StyledKappa = styled.input`
@@ -157,18 +230,31 @@ const StyledKappa = styled.input`
     border-radius: 4px !important;
     margin: 0px 8px !important;
     height: 40.8px !important;
+    width: ${props => props.isCompareForm ? '250px' : '200px'} !important;
+    font-size: 14px !important;
 `;
 
 const StyledButton = styled.button`
     background-color: #502380;
     color: white;
     border-radius: 8px;
-    padding: 6px 16px;
-    /* width: 65px; */
-    height: 40px;
+    padding: ${props => props.isCompareForm ? '8px 20px' : '6px 16px'};
+    height: ${props => props.isCompareForm ? '44px' : '40px'};
     text-transform: uppercase;
     border: none;
-    min-width: 120px;
+    min-width: ${props => props.isCompareForm ? '180px' : '120px'};
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: ${props => props.isCompareForm ? '600' : 'normal'};
+    
+    &:hover {
+        background-color: #3d1b63;
+        transform: ${props => props.isCompareForm ? 'translateY(-1px)' : 'none'};
+    }
+    
+    &:active {
+        transform: translateY(0);
+    }
 `;
 
 const StyledFlexRow = styled.div`
@@ -176,15 +262,47 @@ const StyledFlexRow = styled.div`
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    gap: 12px;
-    margin: 20px;
+    gap: 15px;
+    margin: 15px 0;
+    flex-wrap: wrap;
 `;
 
 const StyledCompareForm = styled.form`
     border: 2px solid #efefef;
-    padding: 20px;
+    padding: 30px;
     border-radius: 12px;
     width: min-content;
     text-align: center;
     margin: 40px auto;
+    min-width: 1200px;
+    max-width: 1500px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+`;
+
+const StyledTitle = styled.h2`
+    color: #502380;
+    margin-bottom: 20px;
+    text-align: center;
+`;
+
+const StyledLabel = styled.label`
+    font-weight: bold;
+    color: #333;
+    min-width: 120px;
+    text-align: left;
+    font-size: 14px;
+`;
+
+
+const StyledInfo = styled.div`
+    background-color: #f0f8ff;
+    border: 1px solid #87ceeb;
+    border-radius: 6px;
+    padding: 12px;
+    margin: 15px auto; 
+    font-size: 14px;
+    max-width: 700px;
+    color: #2c5aa0;
+    text-align: center;
+    line-height: 1.4;
 `;

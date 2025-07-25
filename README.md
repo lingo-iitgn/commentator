@@ -1,7 +1,5 @@
 # COMMENTATOR :writing_hand:: A Code-mixed Multilingual Text Annotation Framework.
-<!--   <a href="https://lingo.iitgn.ac.in/codemixing/">
-    <img alt="Website" src="https://img.shields.io/badge/Project-Website-brightgreen">
-  </a> -->
+
 <div align="center">
   <p>
     <a href="https://aclanthology.org/2024.emnlp-demo.11.pdf"><img alt="EMNLP" src="https://img.shields.io/badge/EMNLP-2024-brightgreen"></a>
@@ -23,6 +21,8 @@
 - Scalable Architecture: Built with ReactJS, Flask, and MongoDB for robust performance.
 
 - Extensibility: Easily extend to new language pairs, refer to the `Configuration Changes` file in the **Documents** folder.
+  
+- Inter-Annotator Agreement Calculation: Supports agreement metrics such as Cohen’s Kappa (for two annotators) and Fleiss’ Kappa (for three annotators) to assess annotation consistency.
 
 - For more details, please refer to [`our paper (EMNLP 2024:demo)`](https://aclanthology.org/2024.emnlp-demo.11.pdf).
 
@@ -51,9 +51,11 @@ COMMENTATOR/
 │   │   ├── Auth/             # Authentication components
 │   │   ├── Components/       # Reusable UI components
 │   │   ├── Edit/             # Annotation editing interface
-│   │   ├── Matrix/           # Matrix analysis interface
-│   │   ├── POS/              # POS tagging interface
 │   │   ├── Home/             # LID page interface
+│   │   ├── Matrix/           # Matrix analysis interface
+│   │   ├── NER/              # NER interface 
+│   │   ├── POS/              # POS tagging interface
+│   │   ├── Translate/        # Translation interface 
 │   │   ├── User/             # User management
 │   │   ├── utils/            # Utility functions
 │   │   └── Router.js         # Application routing
@@ -100,17 +102,68 @@ c. Updating Frontend URL
 
     frontend = YOUR_FRONTEND_HOST_URL
     OR
-    frontend = http://localhost:3003
+    frontend = http://localhost:3000
 
-d. Updating MongoDB URL
+d.  Set up MongoDB connection in `app.py`
 
-> Open `app.py` in a code/text editor (Visual Studio Code, Sublime Text, Notepad etc)
+Choose one of the following options depending on your setup:
+>  For Local Setup:
+   Ensure MongoDB is running locally, and set:
 
     conn_str = YOUR_MONGODB_URL
     OR
     conn_str = "mongodb://127.0.0.1:27017/"
 
-e. Running the local server
+> For Cloud MongoDB (Atlas):
+  Create an account:
+  👉 [`https://cloud.mongodb.com/`](https://cloud.mongodb.com/)
+    
+  Set up your Cluster, Database, and User.
+    
+    Copy your connection string and replace credentials:
+
+    conn_str = "mongodb+srv://<username>:<password>@cluster0.stlpmgf.mongodb.net/?retryWrites=true&w=majority"
+
+
+e.  Set the database name:
+
+> If you want to Change or modify to a specific database, update this line in `app.py`:
+
+    database = client['sentences_EMNLP24']
+    
+   Replace 'sentences_EMNLP24' with your preferred database name as needed.
+
+f.  API Configuration for the Translation task:
+
+#### The backend supports three different AI providers for translation tasks. Configure the API keys based on your preferred provider:
+
+Groq API Setup
+Get your Groq API key from [`https://console.groq.com/keys`](https://console.groq.com/keys) and add it to the `.env` file in the backend directory:
+
+```env
+GROQ_API_KEY="YOUR_GROQ_API_KEY"
+```
+> Model used: llama-3.3-70b-versatile (you can change this model in the code as needed)
+
+OpenAI API Setup (Optional)
+Get your OpenAI API key from [`https://platform.openai.com/api-keys`](https://platform.openai.com/api-keys). Then, uncomment the OpenAI API integration code in `app.py` and set your API key:
+
+```
+os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"
+```
+> Model used: gpt-4 (you can change this model in the code as needed)
+
+Anthropic (Claude) API Setup (Optional)
+Get your Anthropic API key from [`https://docs.anthropic.com/en/api/admin-api/apikeys/get-api-key`](https://docs.anthropic.com/en/api/admin-api/apikeys/get-api-key). Then, uncomment the Anthropic API integration code in `app.py` and set your API key:
+
+```
+os.environ["ANTHROPIC_API_KEY"] = "YOUR_ANTHROPIC_API_KEY"
+```
+> Model used: claude-3-5-sonnet-20241022 (you can change this model in the code as needed)
+
+Note: You can configure multiple API providers, but ensure at least one is properly set up for the translation functionality to work correctly.
+
+g.  Running the local server
 
     python app.py
     OR
@@ -244,7 +297,7 @@ It provides both annotator interface for efficient and faster annotation and adm
 > `username: commentator`  
 > `password: commentator`
 
-### 🔑 Admin Access
+For Admin Access
 
 > `username: admin`  
 > `password: admin`
@@ -253,21 +306,21 @@ It provides both annotator interface for efficient and faster annotation and adm
 
 ## 📦 Database Schemas
 
-| Collection |        Description                          |
-| ---------- | ------------------------------------------- |
-|  lid       | Language Identification at Token level      |
-|  matrix    | Matrix based Identification of Sentences    |
-|  pos       | POS tags based Identification of Tokens     |
-|  sentences | Sentences to be annotated                   |
-|  users     | Admin & Annotator Accounts                  |
+| Collection |        Description                              |
+| ---------- | ------------------------------------------------|
+|  lid       | Language Identification at Token level          |
+|  matrix    | Matrix based Identification of Sentences        |
+|  pos       | POS tags based Identification of Tokens         |
+|  ner       | Named Entity Recognition of Tokens              |
+|  translate | Sentence-level Translation to Target Language   |
+|  sentences | Sentences to be annotated                       |
+|  users     | Admin & Annotator Accounts                      |
 
 ---
 
 ## :link: Relevant Links 
 
 Paper Link: [`EMNLP 2024 Demo Paper`](https://aclanthology.org/2024.emnlp-demo.11.pdf)
-
-Demostration: [`Demo Video`](https://bit.ly/commentator_video)
 
 Explore the Project: [`Project Website`](https://lingo.iitgn.ac.in/codemixing/)
 

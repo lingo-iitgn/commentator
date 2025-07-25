@@ -16,7 +16,7 @@
   
   /* Leftbox style */
   .leftBox{
-    top: 95px;
+    top: 90px;
     left: 10px;
     position: fixed;
     width: 25%;
@@ -48,11 +48,13 @@
     position: fixed;
     top: 175px;
     right: 70px;
+    /* margin-top: -120px; */
     width: 65%;
     text-align: center;
     vertical-align: middle;
     margin: auto;
   }
+
   
   .textArea{
     width: 100%;
@@ -66,6 +68,7 @@
     margin: auto;
   }
   
+
   .btn {
     border: none;
     color: white;
@@ -92,6 +95,7 @@
     border-radius: 5px;
   }
   
+
   .Box{
     position: absolute;
     right: 70px;
@@ -105,7 +109,24 @@
   }
   
   
-  
-  
-  
-  
+.translate-input,
+.translateBox {
+  width: 100%;
+  max-width: 850px;
+  height: auto;
+  padding: 10px;
+  outline: none;
+  border: none;
+  background-color: white;
+  box-shadow: 0px 0px 12px 0px #eee;
+  color: rgba(0, 0, 0, 0.8);
+  font-size: 1.2rem;
+  font-family: sans-serif;
+  width: 850px;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  white-space: pre-wrap !important;
+  line-height: 2rem;
+  border-radius: 5px; 
+  margin-top: 10px; 
+}

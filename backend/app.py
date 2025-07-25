@@ -1,33 +1,45 @@
-import string
-import sys
-import pymongo
-from flask import Flask, jsonify, redirect, render_template, request, json, session, send_from_directory, send_file
-from flask_session import Session
-import pandas as pd
+import time
+import os
 import csv
+import json
+import numpy as np
+import pandas as pd
+import pymongo
+from flask import Flask, jsonify, redirect, request, session, send_file
+from flask_session import Session
+from flask_cors import CORS, cross_origin
 from passlib.hash import sha256_crypt
 from functools import wraps
-import json
-from flask_cors import CORS, cross_origin
-import os
-import subprocess
-import numpy as np
-from codeswitch.codeswitch import POS
-from bson.objectid import ObjectId
-from LID_tool.getLanguage import langIdentify
+from pydantic import BaseModel
+from dotenv import load_dotenv
+from collections import Counter
 from sklearn.metrics import cohen_kappa_score
+from statsmodels.stats.inter_rater import fleiss_kappa
+from codeswitch.codeswitch import POS, NER
+from LID_tool.getLanguage import langIdentify
+from groq import Groq
+from openai import OpenAI
+import anthropic
+
+
 
 app = Flask(__name__)
 
-cors = CORS(app, resources={
-            r"/register": {"origins": "*"}}, static_folder='../frontend/build')
+# cors = CORS(app, resources={
+#             r"/register": {"origins": "*"}}, static_folder='../frontend/build')
+
+CORS(app, 
+     origins=["http://localhost:3000"],  
+     allow_headers=["Content-Type", "Authorization"], 
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+
 app.config.from_pyfile('config.py')
 Session(app)
 
 sess = Session()
 sess.init_app(app)
 
-frontend = 'http://localhost:3003'
+frontend = 'http://localhost:3000' # replace with your frontend URL
 
 conn_str = "mongodb://127.0.0.1:27017/"
 
@@ -52,8 +64,6 @@ def test():
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def register():
     user_collection = database["users"]
-    lid_collection = database["lid"] 
-    pos_collection = database["pos"]
     requestdata = json.loads(request.data)
     requestdata = json.loads(requestdata['body'])
     username = requestdata['username']
@@ -79,15 +89,36 @@ def register():
         print(client.list_database_names())
         return jsonify({'result': result})
 
+def init_db():
+    user_collection = database["users"]
+    
+    predefined_users = [
+        {
+            "username": "admin",
+            "password": sha256_crypt.hash("admin"),
+            "admin": True
+        },
+        {
+            "username": "commentator",
+            "password": sha256_crypt.hash("commentator"),
+            "admin": False
+        }
+    ]
+    
+    for user in predefined_users:
+        if not user_collection.find_one({"username": user["username"]}):
+            user_collection.insert_one(user)
+            print(f"Created predefined user: {user['username']}")
 
 @app.route('/login', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def login():
     user_collection = database.get_collection('users')
     lid_collection = database["lid"]  
-    sentences_collection = database["sentences"]
     pos_collection = database["pos"]
     matrix_collection = database["matrix"]
+    ner_collection = database["ner"]
+    translation_collection = database["translation"]
     requestdata = json.loads(request.data)
     requestdata = json.loads(requestdata['body'])
 
@@ -102,6 +133,8 @@ def login():
     sentId = None
     pos_id = None
     mat_id = None
+    ner_id = None
+    trans_id = None
 
     if res:
         data = res[0]
@@ -119,11 +152,13 @@ def login():
         error = 'Username not found'
         return jsonify({'error': error}), 404
 
-    # Find latest document for sentId, pos_id, and mat_id
     lid_result = lid_collection.find_one({'user_id': session['user_id']}, sort=[('_id', -1)])
     pos_result = pos_collection.find_one({'user_id': session['user_id']}, sort=[('_id', -1)])
     mat_result = matrix_collection.find_one({'user_id': session['user_id']}, sort=[('_id', -1)])
-
+    ner_result = ner_collection.find_one({'user_id': session['user_id']}, sort=[('_id', -1)])
+    trans_result = translation_collection.find_one({'user_id': session['user_id']}, sort=[('_id', -1)])
+    
+    
     if lid_result:
         sentId = lid_result.get('sentId', 0) + 1
         session['sentId'] = sentId
@@ -153,16 +188,38 @@ def login():
         mat_id = 0
         matrix_collection.insert_one({'user_id': session['user_id'], 'username': username, 'mat_id': mat_id, 'matrixTag': []})
         session['mat_id'] = mat_id
+
+    if ner_result:
+        ner_id = ner_result.get('ner_id', 0) 
+        session['ner_id'] = ner_id
+        nerTag = ner_result.get('nerTag', [])
+        ner_collection.update_one({'_id': ner_result['_id']}, {'$set': {'nerTag': nerTag}})
+    else:
+        ner_id = 0
+        ner_collection.insert_one({'user_id': session['user_id'], 'username': username, 'ner_id': ner_id, 'nerTag': []})
+        session['ner_id'] = ner_id
+    
+    if trans_result:
+        trans_id = trans_result.get('trans_id', 0) 
+        session['trans_id'] = trans_id
+        transTag = trans_result.get('transTag', [])
+        translation_collection.update_one({'_id': ner_result['_id']}, {'$set': {'transTag': transTag}})
+    else:
+        trans_id = 0
+        translation_collection.insert_one({'user_id': session['user_id'], 'username': username, 'trans_id': trans_id, 'transTag': []})
+        session['trans_id'] = trans_id
+
     returning = {
         'username': session['username'],
         'admin': admin,
         'sentId': sentId,
         'pos_id': pos_id,
         'mat_id' : mat_id,
+        'ner_id' : ner_id,
+        'trans_id' : trans_id,
     }
 
-    return jsonify({'success': returning, 'username': session['username'], 'sentId': sentId, 'pos_id': pos_id, 'mat_id': mat_id})
-
+    return jsonify({'success': returning, 'username': session['username'], 'sentId': sentId, 'pos_id': pos_id, 'mat_id': mat_id,  'ner_id' : ner_id, 'trans_id' : trans_id})
 def is_logged_in(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -179,8 +236,7 @@ def is_logged_in(f):
 def logout():
     session.clear()
     return jsonify({'message': "You are logged out"})
-
-
+        
 @app.route('/get-sentence', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type'])
 def get_sentence():
@@ -214,36 +270,66 @@ def get_sentence():
 @cross_origin(origin='*', headers=['Content-Type'])
 def get_p_sentence():
     sentences_collection = database["sentences"]
+    
     requestdata = json.loads(request.data)
     print("request", requestdata)
-    pos_id = requestdata['pos_id']
-    print("pos_id",pos_id)
+    pos_id = requestdata.get('pos_id')  
+    print("pos_id", pos_id)
 
-    result = sentences_collection.find({'pos_id': pos_id})
+    if pos_id is None:
+        return jsonify({'error': "No pos_id provided"}), 400  
+
+    sentence_result = sentences_collection.find_one({'pos_id': pos_id})
+
+    if sentence_result:
+        sentence = sentence_result.get('sentence')
+        pos_tags = sentence_result.get('pos_tags', [])
+        
+        result = {
+            'sentence': sentence,
+            'pos_id': pos_id,
+            'pos_tags': pos_tags,
+            'message': "Sentence and POS tags fetched successfully."
+        }
+        return jsonify({'result': result})
+    else:
+        return jsonify({'error': "No sentence found for the provided pos_id"}), 404
+
+@app.route('/get-n-sentence', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type'])
+def get_n_sentence():
+    sentences_collection = database["sentences"]
+    requestdata = json.loads(request.data)
+    # print("request", requestdata)
+    ner_id = requestdata['ner_id']
+    print("ner_id",ner_id)
+
+    result = sentences_collection.find({'ner_id': ner_id})
     data = list(result)
 
     if data: 
         data = data[0]
         sentence = data['sentence']
-        pos_id = data['pos_id']
-        pos_tags = data['pos_tags']
+        ner_id = data['ner_id']
+        ner_tags = data['ner_tags']
 
         result = {
             'sentence': sentence,
-            'pos_id': pos_id,
-            'pos_tags': pos_tags,
+            'ner_id': ner_id,
+            'ner_tags': ner_tags,
             'message': "Sentence Fetched Successfully."
         }
         return jsonify({'result': result})
     else:
         return jsonify({'error': "No sentence found for the provided sentId"})
 
+
 @app.route('/get-m-sentence', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type'])
 def get_m_sentence():
     sentences_collection = database["sentences"]
     requestdata = json.loads(request.data)
-    print("request", requestdata)
+    # print("request", requestdata)
     mat_id = requestdata['mat_id']
     print("mat_id",mat_id)
 
@@ -254,13 +340,38 @@ def get_m_sentence():
         data = data[0]
         sentence = data['sentence']
         mat_id = data['mat_id']
-        tags = data['tags']
-
 
         result = {
             'sentence': sentence,
             'mat_id': mat_id,
-            'tags': tags,
+            'message': "Sentence Fetched Successfully."
+        }
+        return jsonify({'result': result})
+    else:
+        return jsonify({'error': "No sentence found for the provided sentId"})
+
+@app.route('/get-t-sentence', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type'])
+def get_t_sentence():
+    sentences_collection = database["sentences"]
+    requestdata = json.loads(request.data)
+    print("request", requestdata)
+    trans_id = requestdata['trans_id']
+    print("trans_id",trans_id)
+
+    result = sentences_collection.find({'trans_id': trans_id})
+    data = list(result)
+    # print("data", data)
+
+    if data: 
+        data = data[0]
+        # print("data", data)
+        sentence = data['sentence']
+        trans_id = data['trans_id']
+
+        result = {
+            'sentence': sentence,
+            'trans_id': trans_id,
             'message': "Sentence Fetched Successfully."
         }
         return jsonify({'result': result})
@@ -284,81 +395,234 @@ def lid_tag():
     except Exception as e:
         return jsonify({'error': str(e)})
 
+
 from bson.objectid import ObjectId
 
 @app.route('/admin-file-upload', methods=['GET', 'POST'])
-# @app.route('/admin-pos-file-upload', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def admin_file_upload():
-    import pandas as pd
-    from codeswitch.codeswitch import POS
-    from LID_tool.getLanguage import langIdentify
-
     print(request.files['file'])
     file = request.files['file']
     file.save('uploads/{}'.format(file.filename))
 
     sentences_collection = database.get_collection('sentences')
-    pos_collection = database.get_collection('sentences')
-    matrix_collection = database.get_collection('sentences')
 
     filename = file.filename
-    df = pd.read_csv('uploads/{}'.format(filename), header=None)
+    df = pd.read_csv(f'uploads/{filename}', header=None, on_bad_lines='skip')
     df = df.iloc[:, 0]
     print(df)
+    load_dotenv()
 
+    client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+
+    class TranslationResult(BaseModel):
+        # hinglish: str
+        english: str
+        romanized_hindi: str
+        devnagarish: str
+
+    def translate_with_llm(text: str, target_language: str) -> str:
+        if target_language == "Romanized Hindi":
+            prompt = (
+                f"Translate this to {target_language} (write in Roman script):\n"
+                f"{text}, only give translations to the given text and don't add explanations or extra text."
+            )
+        else:
+            prompt = f"Translate this to {target_language}:\n{text}, only give translations to the given text and don't add explanations or extra text."
+
+        chat_completion = client.chat.completions.create(
+            messages=[{"role": "system", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+            temperature=0
+        )
+        response = chat_completion.choices[0].message.content.strip()
+        return response.split("\n")[0].strip()
+    
+    ##### OPENAI API Integration for the Translation task #####
+
+    # os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"
+
+    # # Initialize OpenAI client
+    # client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+    # # TranslationResult model
+    # class TranslationResult(BaseModel):
+    #     english: str
+    #     romanized_hindi: str
+    #     devnagarish: str
+
+    # # Translate text with LLM
+    # def translate_with_llm(text: str, target_language: str) -> str:
+    #     if target_language == "Romanized Hindi":
+    #         prompt = (
+    #             f"Translate this to {target_language} (write in Roman script):\n"
+    #             f"{text}, please only give translations to the given text and don't add explanations."
+    #         )
+    #     elif target_language == "Devanagari Hindi":
+    #         prompt = (
+    #             f"Translate this to {target_language} (write in Devanagari script):\n"
+    #             f"{text}, only give translations to the given text and don't add explanations or extra text."
+    #         )
+    #     else:
+    #         prompt = f"Translate this to {target_language}:\n{text}, only give translations to the given text and don't add explanations or extra text."
+    #     # OpenAI API request
+    #     chat_completion = client.chat.completions.create(
+    #         messages=[{"role": "system", "content": prompt}],
+    #         model="gpt-4",
+    #         temperature=0
+    #     )
+    #     response = chat_completion.choices[0].message.content.strip()
+    #     return response.split("\n")[0].strip()
+
+    ##### Anthropic API Integration for the Translation task #####
+
+    # os.environ["ANTHROPIC_API_KEY"] = "YOUR_ANTHROPIC_API_KEY"
+
+    # client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    # class TranslationResult(BaseModel):
+    #     hinglish: str
+    #     english: str
+    #     romanized_hindi: str
+    #     devnagarish: str
+
+    # # Get completion from Claude
+    # def translate_with_llm(client: anthropic.Anthropic, prompt: str) -> str:
+    #         """
+    #         Get completion from Claude using the Anthropic API
+    #         """
+    #         try:
+    #             message = client.messages.create(
+    #                 model="claude-3-5-sonnet-20241022",
+    #                 max_tokens=1000,
+    #                 temperature=0,
+    #                 messages=[
+    #                     {
+    #                         "role": "user",
+    #                         "content": prompt
+    #                     }
+    #                 ]
+    #             )
+    #             # Claude response is a list of content blocks; get the first text block
+    #             return message.content[0].text
+    #         except Exception as e:
+    #             print(f"Error getting completion: {e}")
+    #             return "Error: API call failed"
+
+    def translate_sentence(sentence: str) -> TranslationResult:
+        english_translation = translate_with_llm(sentence, "English")
+        romanized_hindi = translate_with_llm(sentence, "Romanized Hindi")
+        devnagarish = translate_with_llm(sentence, "Devanagari Hindi")
+
+        return TranslationResult(
+            hinglish=sentence,
+            english=english_translation,
+            romanized_hindi=romanized_hindi,
+            devnagarish=devnagarish
+        )
+    # Fetch the last IDs for sentences, POS, matrix, and NER
     last_sent_id = 0
-    prev_sent = sentences_collection.find()
-    prev_sent = list(prev_sent)
-    if len(prev_sent) > 0:
-        prev_sent = prev_sent[-1]
-        print(prev_sent['sentId'])
-        last_sent_id = prev_sent['sentId']
+    prev_sent = list(sentences_collection.find())
+    if prev_sent:
+        last_sent_id = prev_sent[-1]['sentId']
 
     last_pos_id = 0
-    prev_pos = pos_collection.find()
-    prev_pos = list(prev_pos)
-    if len(prev_pos) > 0:
-        prev_pos = prev_pos[-1]
-        print(prev_pos['pos_id'])
-        last_pos_id = prev_pos['pos_id']
+    prev_pos = list(sentences_collection.find())
+    if prev_pos:
+        last_pos_id = prev_pos[-1]['pos_id']
 
     last_mat_id = 0
-    prev_mat = matrix_collection.find()
-    prev_mat = list(prev_mat)
-    if len(prev_mat) > 0:
-        prev_mat = prev_mat[-1]
-        print(prev_mat['mat_id'])
-        last_mat_id = prev_mat['mat_id']
+    prev_mat = list(sentences_collection.find())
+    if prev_mat:
+        last_mat_id = prev_mat[-1]['mat_id']
 
-    idx = 0
-    text = []
-    for sent in range(len(df)):
-        text.append(df[sent])
+    last_ner_id = 0
+    prev_ner = list(sentences_collection.find())
+    if prev_ner:
+        last_ner_id = prev_ner[-1]['ner_id']
+    
+    last_trans_id = 0
+    prev_trans = list(sentences_collection.find())
+    if prev_trans:
+        last_trans_id = prev_trans[-1]['trans_id']
 
+    text = df.tolist()
     print(text)
 
     pos = POS('hin-eng')
     pos_tags = pos.tag(text)
-    print(pos_tags)
+    # print(pos_tags)
 
-    for sent in range(len(df)):
+    ner = NER('hin-eng')
+    ner_tags = ner.tag(text)
+    # print(ner_tags)
+
+    # def clean_token(token):
+    #     return token.replace('\\"', '"').replace('\\', '').strip('"')
+
+    for idx, sentence in enumerate(df):
         last_sent_id += 1
         last_pos_id += 1
         last_mat_id += 1
+        last_ner_id += 1
+        last_trans_id += 1
 
-        print(df[sent])
-        sentence = df[sent]
-        pos_id = 'pos' + str(last_pos_id).zfill(5)  # Format pos_id as posXXXXX
-        pos_collection.insert_one({
+        # print(sentence)
+        translation_result = translate_sentence(sentence)
+        
+        tokens = sentence.split()
+
+        aligned_ner_tags = ner_tags[idx]
+        combined_ner_tags = []
+        used_words = set()
+        current_word = ""
+        current_entity = None
+
+        for tag in aligned_ner_tags:
+            word = tag['word']
+            entity = tag['entity'] if tag['entity'] else "X"
+
+            if word.startswith("##"):  
+                current_word += word[2:]
+            else:
+                if current_word:  
+                    combined_ner_tags.append({"word": current_word, "entity": current_entity})
+                    used_words.add(current_word)
+                current_word = word
+                current_entity = entity
+
+        if current_word:
+            combined_ner_tags.append({"word": current_word, "entity": current_entity})
+            used_words.add(current_word)
+
+        final_ner_tags = []
+        for token in tokens:
+            if token in used_words:
+                for tag in combined_ner_tags:
+                    if tag['word'] == token:
+                        final_ner_tags.append(tag)
+                        break
+            else:
+                # Assign 'X' if the token wasn't used in CodeSwitch predictions
+                final_ner_tags.append({"word": token, "entity": "X"})
+
+        print(final_ner_tags)
+
+        sentences_collection.insert_one({
             "sentence": sentence,
             "sentId": last_sent_id,
             "pos_id": last_pos_id,
-            "mat_id" : last_mat_id,
+            "mat_id": last_mat_id,
+            "ner_id": last_ner_id,
+            "trans_id": last_trans_id,
             "tags": [],
             "pos_tags": json.dumps(pos_tags[idx], cls=NpEncoder),
+            "ner_tags": json.dumps(final_ner_tags, cls=NpEncoder),
+            "eng_tags": translation_result.english,
+            "RH_tags": translation_result.romanized_hindi,
+            "DH_tags": translation_result.devnagarish
         })
 
+        # Perform language identification
         lang = langIdentify(sentence, 'classifiers/HiEn.classifier')
         tags = []
 
@@ -371,9 +635,7 @@ def admin_file_upload():
                 inter.append('h')
             tags.append(inter)
 
-        pos_collection.update_one({'sentence': sentence}, {'$set': {'tags': tags}})
-
-        idx = idx + 1
+        sentences_collection.update_one({'sentence': sentence}, {'$set': {'tags': tags}})
 
     print('Task Finished')
 
@@ -391,27 +653,68 @@ class NpEncoder(json.JSONEncoder):
             return obj.tolist()
         return json.JSONEncoder.default(self, obj)
 
-@app.route('/fetch-pos-sent', methods=['GET', 'POST'])
+@app.route('/fetch-pos-sent', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def fetch_pos_sent():
-    pos_collection = database.get_collection('sentences')
-    pos_list = pos_collection.find({})
-    pos_list = list(pos_list)
-    #print(pos_list)
+    start = time.time()
 
+    pos_collection = database.get_collection('sentences')
+    requestdata = request.get_json(force=True)
+    pos_id = requestdata.get('pos_id')
+
+    pos = pos_collection.find_one({'pos_id': int(pos_id) + 1})
+    result = [[pos['sentence'], pos['pos_tags']]] if pos else []
+
+    print("Time taken:", time.time() - start)
+    return jsonify({'result': result})
+
+@app.route('/fetch-ner-sent', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+def fetch_ner_sent():
+    ner_collection = database.get_collection('sentences')
+    ner_list = ner_collection.find({})
+    ner_list = list(ner_list)
+    # print(ner_list)
     requestdata = json.loads(request.data)
-    print(requestdata)
     requestdata = json.loads(requestdata['body'])
 
-    pos_id = requestdata['pos_id']
+    ner_id = requestdata['ner_id']
+    print("ner_id received:", ner_id)
 
-    pos_list_gen = []
-    for pos in pos_list:
-        if(pos['pos_id'] == int(pos_id) + 1):
-            pos_list_gen.append([pos['sentence'], pos['pos_tags']])
+    ner_list_gen = []
+    for ner in ner_list:
+        if (ner['ner_id'] == int(ner_id) + 1):
+            ner_list_gen.append([ner['sentence'], ner['ner_tags']])
             break
 
-    return jsonify({'result': pos_list_gen})
+    # print("ner_list_gen:", ner_list_gen)
+    return jsonify({'result': ner_list_gen})
+
+@app.route('/fetch-translation-sent', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+def fetch_trans_sent():
+    translation_collection = database.get_collection('sentences')
+    translation_list = translation_collection.find({})
+    translation_list = list(translation_list)
+    requestdata = json.loads(request.data)
+    # print("Request data:", requestdata)
+    requestdata = json.loads(requestdata['body'])
+
+    trans_id = requestdata['trans_id']
+    print("trans_id received:", trans_id)
+
+    translation_list_gen = []
+    for trans in translation_list:
+        if trans['trans_id'] == int(trans_id) + 1:
+            translation_list_gen.append({
+                "sentence": trans['sentence'],
+                "eng_tags": trans['eng_tags'],
+                "RH_tags": trans['RH_tags'],
+                "DH_tags": trans['DH_tags']
+            })
+            break
+
+    return jsonify({'result': translation_list_gen})
 
 @app.route('/sentence-schema-creation', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
@@ -420,14 +723,28 @@ def sentence_schema_creation():
         database.create_collection('users')
     except:
         print("Already exists")
-
     try:
         database.create_collection('sentences')
     except:
         print("Already exists")
-
     try:
         database.create_collection('lid')
+    except:
+        print("Already exists")
+    try:
+        database.create_collection('matrix')
+    except:
+        print("Already exists")
+    try:
+        database.create_collection('pos')
+    except:
+        print("Already exists")
+    try:
+        database.create_collection('ner')
+    except:
+        print("Already exists")
+    try:
+        database.create_collection('translation')
     except:
         print("Already exists")
 
@@ -439,15 +756,20 @@ def sentence_schema_creation():
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def fetch_users_list():
     user_collection = database.get_collection('users')
-    user_list = user_collection.find({})
+    
+    user_list = user_collection.find({
+        '$or': [
+            {'admin': {'$ne': True}},      
+            {'admin': {'$exists': False}}  
+        ]
+    })
+    
     user_list = list(user_list)
 
     users_list = []
     for user in user_list:
         users_list.append(user['username'])
     print(users_list)
-    # user_list = list(user_collection)
-    # print(user_list)
 
     return jsonify({'result': users_list})
 
@@ -455,51 +777,39 @@ def fetch_users_list():
 @app.route('/csv-download', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def csv_download():
+    from flask import send_file
+    import csv
+
     username = request.form.get('username')
     cmi = request.form.get('cmi')
+    os.makedirs('csv', exist_ok=True)
+
     file_type = request.form.get('file_type')
-    pos_file = None
-    lid_file = None
-    matrix_file = None
+
+    lid_file = pos_file = matrix_file = ner_file = translation_file = None
 
     if username and username != 'ALL':
-        pos_collection = database.get_collection('pos')
         lid_collection = database.get_collection('lid')
+        pos_collection = database.get_collection('pos')
         matrix_collection = database.get_collection('matrix')
+        ner_collection = database.get_collection('ner')
+        translation_collection = database.get_collection('translation')
 
-        # Process POS collection
-        user = pos_collection.find_one({'username': username})
-        if user:
-            posTag = user.get('posTag', [])
-            pos_file = f'csv/{username}_pos.csv'
-            with open(pos_file, 'w', encoding='utf-8', newline="") as f:
-                writer = csv.writer(f)
-                writer.writerow(['date', 'time', 'tag'])
-                for sentence in posTag:
-                    date = sentence[0]
-                    time = sentence[1]
-                    tags = sentence[2]
-                    feedback = sentence[3]
-                    row = [date, time, tags, feedback]
-                    writer.writerow(row)
-
-        # Process LID collection
         user = lid_collection.find_one({'username': username})
         if user:
             sentTag = user.get('sentTag', [])
             lid_file = f'csv/{username}_lid.csv'
             with open(lid_file, 'w', encoding='utf-8', newline="") as f:
                 writer = csv.writer(f)
-                writer.writerow(['grammar', 'date', 'tag', 'link', 'hashtag', 'time', 'CMI Score'])
+                writer.writerow(['date', 'lid tags', 'link', 'hashtag', 'time', 'feedback', 'CMI Score'])
                 for sentence in sentTag:
-                    grammar = sentence[0]
-                    date = sentence[1]
-                    tag = sentence[2]
-                    link = sentence[3]
-                    hashtag = sentence[4] if sentence[4] else []
-                    time = sentence[5]
-                    feedback = sentence[6]
-                    row = [grammar, date, tag, link, hashtag, time, feedback]
+                    date = sentence[0]
+                    tag = sentence[1]
+                    link = sentence[2]
+                    hashtag = sentence[3] if sentence[4] else []
+                    time = sentence[4]
+                    feedback = sentence[5]
+                    row = [date, tag, link, hashtag, time, feedback]
 
                     en_count = 0
                     hi_count = 0
@@ -527,7 +837,21 @@ def csv_download():
                         row.append(cmi_score)
                         writer.writerow(row)
 
-        # Process Matrix collection
+        user = pos_collection.find_one({'username': username})
+        if user:
+            posTag = user.get('posTag', [])
+            pos_file = f'csv/{username}_pos.csv'
+            with open(pos_file, 'w', encoding='utf-8', newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(['date', 'time', 'pos tags', 'feedback'])
+                for sentence in posTag:
+                    date = sentence[0]
+                    time = sentence[1]
+                    tags = sentence[2]
+                    feedback = sentence[3]
+                    row = [date, time, tags, feedback]
+                    writer.writerow(row)
+
         user = matrix_collection.find_one({'username': username})
         if user:
             matrixTag = user.get('matrixTag', [])
@@ -543,12 +867,57 @@ def csv_download():
                    writer.writerow(row)
                    print(sentence)
 
-        if file_type == 'pos' and pos_file:
-            return send_file(pos_file, as_attachment=True)
-        elif file_type == 'lid' and lid_file:
+        user = ner_collection.find_one({'username': username})
+        if user:
+            nerTag = user.get('nerTag', [])
+            ner_file = f'csv/{username}_ner.csv'
+            with open(ner_file, 'w', encoding='utf-8', newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(['date', 'time', 'ner tags', 'feedback'])
+                for sentence in nerTag:
+                    date = sentence[0]
+                    time = sentence[1]
+                    tags = sentence[2]
+                    feedback = sentence[3]
+                    if len(sentence) > 3:
+                        feedback = sentence[3]
+                    else:
+                        feedback = None 
+                    row = [date, time, tags, feedback]
+                    writer.writerow(row)
+
+        user = translation_collection.find_one({'username': username})
+        if user:
+            trans_tags = user.get('transTag', [])
+            translation_file = f'csv/{username}_translation.csv'
+            with open(translation_file, 'w', encoding='utf-8', newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(['date', 'time', 'sentences','eng_tags', 'RH_tags', 'DH_tags', 'feedback'])
+                for tag in trans_tags:
+                    if len(tag) >= 6:  
+                        date = tag[0]
+                        time = tag[1]
+                        sentences = tag[2]
+                        eng_tags = tag[3]
+                        RH_tags = tag[4]
+                        DH_tags = tag[5]
+                        feedback = tag[6] 
+                        row = [date, time, sentences, eng_tags, RH_tags, DH_tags, feedback]
+                        writer.writerow(row)
+                    else:
+                        print(f"Invalid tag format: {tag}")
+
+
+        if file_type == 'lid' and lid_file:
             return send_file(lid_file, as_attachment=True)
+        elif file_type == 'pos' and pos_file:
+            return send_file(pos_file, as_attachment=True)
         elif file_type == 'matrix' and matrix_file:
             return send_file(matrix_file, as_attachment=True)
+        elif file_type == 'ner' and ner_file:
+            return send_file(ner_file, as_attachment=True)
+        elif file_type == 'translation' and translation_file:
+            return send_file(translation_file, as_attachment=True)
         else:
             return "File not found", 404
 
@@ -556,13 +925,15 @@ def csv_download():
         pos_collection = database.get_collection('pos')
         lid_collection = database.get_collection('lid')
         matrix_collection = database.get_collection('matrix')
+        ner_collection = database.get_collection('ner')
+        translation_collection = database.get_collection('translation')
 
         # Process all users in POS collection
         all_users_pos = pos_collection.find()
         pos_file = 'csv/all_pos.csv'
         with open(pos_file, 'w', encoding='utf-8', newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(['username', 'date', 'time', 'tag', 'feedback'])
+            writer.writerow(['username', 'date', 'time', 'pos tags', 'feedback'])
             for user in all_users_pos:
                 username = user['username']
                 posTag = user.get('posTag', [])
@@ -579,17 +950,17 @@ def csv_download():
         lid_file = 'csv/all_lid.csv'
         with open(lid_file, 'w', encoding='utf-8', newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(['username', 'date', 'tag', 'link', 'hashtag', 'time', 'feedback', 'CMI Score'])
+            writer.writerow(['username', 'date', 'lid tags', 'link', 'hashtag', 'time', 'feedback', 'CMI Score'])
             for user in all_users_lid:
                 username = user['username']
                 sentTag = user.get('sentTag', [])
                 for sentence in sentTag:
-                    date = sentence[1]
-                    tag = sentence[2]
-                    link = sentence[3]
-                    hashtag = sentence[4] if sentence[4] else []
-                    time = sentence[5]
-                    feedback = sentence[6]
+                    date = sentence[0]
+                    tag = sentence[1]
+                    link = sentence[2]
+                    hashtag = sentence[3] if sentence[4] else []
+                    time = sentence[4]
+                    feedback = sentence[5]
                     row = [username, date, tag, link, hashtag, time, feedback]
 
                     en_count = 0
@@ -623,7 +994,7 @@ def csv_download():
         matrix_file = 'csv/all_matrix.csv'
         with open(matrix_file, 'w', encoding='utf-8', newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(['username', 'tags', 'date', 'time'])
+            writer.writerow(['username', 'tags', 'date', 'time', 'feedback'])
             for user in all_users_matrix:
                 username = user['username']
                 matrix_data = user.get('matrixTag', [])
@@ -631,8 +1002,47 @@ def csv_download():
                     tags = sentence[0]
                     date = sentence[1]
                     time = sentence[2]
-                    row = [username, tags, date, time]
+                    feedback = sentence[3] if len(sentence) > 3 else None
+                    row = [username, tags, date, time, feedback]
                     writer.writerow(row)
+
+        all_users_ner = ner_collection.find()
+        ner_file = 'csv/all_ner.csv'
+        with open(ner_file, 'w', encoding='utf-8', newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(['username', 'date', 'time', 'tag', 'feedback'])
+            for user in all_users_ner:
+                username = user['username']
+                nerTag = user.get('nerTag', [])
+                for sentence in nerTag:
+                    date = sentence[0]
+                    time = sentence[1]
+                    tags = sentence[2]
+                    feedback = sentence[3] if len(sentence) > 3 else None
+                    row = [username, date, time, tags, feedback]
+                    writer.writerow(row)
+
+        all_user_translation = translation_collection.find()
+        translation_file = 'csv/all_translation.csv'
+        with open(translation_file, 'w', encoding='utf-8', newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(['username', 'date', 'time', 'sentences', 'eng_tags', 'RH_tags', 'DH_tags', 'feedback'])
+            for user in all_user_translation:
+                username = user['username']
+                trans_tags = user.get('transTag', [])
+                for sentence in trans_tags:
+                    if len(sentence) >= 5:  
+                        date = sentence[0]
+                        time = sentence[1]
+                        sentences = sentence[2]
+                        eng_tags = sentence[2]
+                        RH_tags = sentence[3]
+                        DH_tags = sentence[4]
+                        feedback = sentence[5] if len(sentence) > 5 else None
+                        row = [username, date, time, sentences, eng_tags, RH_tags, DH_tags, feedback]
+                        writer.writerow(row)
+                    else:
+                        print(f"Invalid tag format: {sentence}")
 
         # Return the requested file
         if file_type == 'pos':
@@ -641,96 +1051,14 @@ def csv_download():
             return send_file(lid_file, as_attachment=True)
         elif file_type == 'matrix':
             return send_file(matrix_file, as_attachment=True)
+        elif file_type == 'ner':    
+            return send_file(ner_file, as_attachment=True)
+        elif file_type == 'translation':
+            return send_file(translation_file, as_attachment=True)
         else:
             return "File not found", 404
 
     return "Invalid request", 400
-    
-@app.route('/compare-annotators', methods=['GET', 'POST'])
-@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
-def compare_annotators():
-    from flask import send_file
-
-    username1 = request.form.get('username1')
-    username2 = request.form.get('username2')
-    kappa = request.form.get('kappa')
-    print(username1, username2, kappa)
-
-    # return jsonify({'result': 'true'})
-    # os.system('compare.py {} {}'.format(username1, username2))
-    import csv
-    username1_name = username1
-    username2_name = username2
-    print('username1 = ', username1_name)
-    print('username2 = ', username2_name)
-
-    user_collection = database.get_collection('lid')
-    username1 = user_collection.find({'username': username1_name})
-    username2 = user_collection.find({'username': username2_name})
-
-    user1 = list(username1)
-    user2 = list(username2)
-
-    print('USER 1 = ', user1)
-    print('USER 2 = ', user2)
-
-    counter = min(int(user1[0]['sentId']), int(user2[0]['sentId']))
-    print(counter)
-
-    sentTag1 = user1[0]['sentTag']
-    sentTag2 = user2[0]['sentTag']
-
-    with open('csv/compare.csv', 'w', encoding='utf-8', newline="") as f:
-        writer = csv.writer(f)
-
-        writer.writerow(['grammar_{}'.format(username1_name), 'date_{}'.format(username1_name), 'tag_{}'.format(username1_name), 'link_{}'.format(username1_name), 'hashtag_{}'.format(username1_name), 'time_{}'.format(username1_name), '', 'grammar_{}'.format(username2_name), 'date_{}'.format(username2_name), 'tag_{}'.format(username2_name), 'link_{}'.format(username2_name), 'hashtag_{}'.format(username2_name),
-                        'time_{}'.format(username2_name), '', 'grammer_same', 'words_with_similar_annotation', 'total_words', 'Cohen Kappa Score'])
-
-        for count in reversed(range(counter)):
-            # print(sentence)
-            grammar_1 = sentTag1[count][0]
-            date_1 = sentTag1[count][1]
-            tag_1 = sentTag1[count][2]
-            link_1 = sentTag1[count][3]
-            hashtag_1 = sentTag1[count][4] if sentTag1[count][4] else []
-            time_1 = sentTag1[count][5]
-
-            empty = ''
-
-            grammar_2 = sentTag2[count][0]
-            date_2 = sentTag2[count][1]
-            tag_2 = sentTag2[count][2]
-            link_2 = sentTag2[count][3]
-            hashtag_2 = sentTag2[count][4] if sentTag2[count][4] else []
-            time_2 = sentTag2[count][5]
-
-            grammer_same = 0
-            if grammar_1 == grammar_2:
-                grammer_same = 1
-
-            words_with_similar_annotation = 0
-            total_words = 0
-            for index in range(len(tag_1)):
-                if tag_1[index]['value'] == tag_2[index]['value']:
-                    words_with_similar_annotation += 1
-                total_words += 1
-
-            from sklearn.metrics import cohen_kappa_score
-            ann1_tags = [elem['value'] for elem in tag_1]
-            ann2_tags = [elem['value'] for elem in tag_2]
-            kappa_score = cohen_kappa_score(
-                ann1_tags, ann2_tags, labels=None, weights=None)
-
-            row = [grammar_1, date_1, tag_1, link_1, hashtag_1, time_1,
-                   empty, grammar_2, date_2, tag_2, link_2, hashtag_2, time_2, empty, grammer_same, words_with_similar_annotation, total_words, kappa_score]
-
-            print(kappa_score, type(kappa_score))
-            if(float(str(kappa_score)) >= float(kappa)):
-                writer.writerow(row)
-            counter -= 1
-            # break
-
-    return send_file('csv/compare.csv', as_attachment=True)
 
 
 @app.route('/submit-sentence', methods=['GET', 'POST'])
@@ -743,49 +1071,286 @@ def submit_sentence():
     requestdata = json.loads(requestdata['body'])
 
     sentId = requestdata.get('sentId', None)
-    selected = requestdata.get('selected', None)
     tag = requestdata.get('tag', None)
     username = requestdata.get('username', None)
     date = requestdata.get('date', None)
     hypertext = requestdata.get('hypertext', None)
     hashtags = requestdata.get('hashtags', None)
     timeDifference = requestdata.get('timeDifference', None)
+    feedback = requestdata.get('feedback', None)
 
-    lst = [selected, date, tag, hypertext, hashtags, timeDifference]
+    new_entry = [date, tag, hypertext, hashtags, timeDifference, feedback]
+    
+    if any(new_entry):
+        user_data = lid_collection.find_one({'username': username})
 
-    lid_collection.update_one({'username': username}, {
-         '$set': {'sentId': sentId},
-            '$push': {'sentTag': lst}
-    })
-    return jsonify({'result': 'Message Stored Successfully'})
+        if user_data:
+            for entry in user_data.get('sentTag', []):
+                if (
+                    entry[1] == date and  
+                    entry[5] == timeDifference and  
+                    json.dumps(entry[2], sort_keys=True) == json.dumps(tag, sort_keys=True)  # tag comparison (index 2)
+                ):
+                    return jsonify({'result': 'Duplicate Entry. Not Stored.'})
+
+            lid_collection.update_one({'username': username}, {
+                '$set': {'sentId': sentId},
+                '$push': {'sentTag': new_entry}
+            })
+            return jsonify({'result': 'Message Stored Successfully'})
+        else:
+            return jsonify({'result': 'User Not Found.'})
+    else:
+        return jsonify({'result': 'No valid data provided.'})
+
+@app.route('/compare-annotators', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+def compare_annotators():
+    username1 = request.form.get('username1')
+    username2 = request.form.get('username2')
+    username3 = request.form.get('username3')  
+    kappa = request.form.get('kappa')
+    kappa_type = request.form.get('kappa_type', 'cohen')  
+    print(username1, username2, username3, kappa, kappa_type)
+
+    username1_name = username1
+    username2_name = username2
+    username3_name = username3 if username3 else None
+    
+    print('username1 = ', username1_name)
+    print('username2 = ', username2_name)
+    if username3_name:
+        print('username3 = ', username3_name)
+
+    user_collection = database.get_collection('lid')
+    username1 = user_collection.find({'username': username1_name})
+    username2 = user_collection.find({'username': username2_name})
+    
+    user1 = list(username1)
+    user2 = list(username2)
+    
+    if username3_name:
+        username3 = user_collection.find({'username': username3_name})
+        user3 = list(username3)
+        print('USER 3 = ', user3)
+        counter = min(int(user1[0]['sentId']), int(user2[0]['sentId']), int(user3[0]['sentId']))
+    else:
+        counter = min(int(user1[0]['sentId']), int(user2[0]['sentId']))
+
+    print('USER 1 = ', user1)
+    print('USER 2 = ', user2)
+    print(counter)
+
+    sentTag1 = user1[0]['sentTag']
+    sentTag2 = user2[0]['sentTag']
+    sentTag3 = user3[0]['sentTag'] if username3_name else None
+
+    def prepare_fleiss_data_for_statsmodels(ann1_tags, ann2_tags, ann3_tags=None):
+        all_annotations = ann1_tags + ann2_tags
+        if ann3_tags:
+            all_annotations += ann3_tags
+        all_categories = sorted(list(set(all_annotations)))
+        
+        n_items = len(ann1_tags)
+        n_categories = len(all_categories)
+        cat_to_idx = {cat: idx for idx, cat in enumerate(all_categories)}
+        
+        ratings_matrix = np.zeros((n_items, n_categories), dtype=int)
+        
+        for i in range(n_items):
+            annotations = [ann1_tags[i], ann2_tags[i]]
+            if ann3_tags:
+                annotations.append(ann3_tags[i])
+            
+            for ann in annotations:
+                if ann in cat_to_idx:
+                    ratings_matrix[i, cat_to_idx[ann]] += 1
+        
+        return ratings_matrix
+
+    if kappa_type == 'fleiss' and username3_name:
+        headers = [
+            'date_{}'.format(username1_name), 'tag_{}'.format(username1_name), 'link_{}'.format(username1_name), 
+            'hashtag_{}'.format(username1_name), 'time_{}'.format(username1_name), '',
+            'date_{}'.format(username2_name), 'tag_{}'.format(username2_name), 'link_{}'.format(username2_name), 
+            'hashtag_{}'.format(username2_name), 'time_{}'.format(username2_name), '',
+            'date_{}'.format(username3_name), 'tag_{}'.format(username3_name), 'link_{}'.format(username3_name), 
+            'hashtag_{}'.format(username3_name), 'time_{}'.format(username3_name), '',
+            'words_with_similar_annotation_all', 'total_words', 'Fleiss_Kappa'
+        ]
+    elif username3_name:
+        headers = [
+            'date_{}'.format(username1_name), 'tag_{}'.format(username1_name), 'link_{}'.format(username1_name), 
+            'hashtag_{}'.format(username1_name), 'time_{}'.format(username1_name), '',
+            'date_{}'.format(username2_name), 'tag_{}'.format(username2_name), 'link_{}'.format(username2_name), 
+            'hashtag_{}'.format(username2_name), 'time_{}'.format(username2_name), '',
+            'date_{}'.format(username3_name), 'tag_{}'.format(username3_name), 'link_{}'.format(username3_name), 
+            'hashtag_{}'.format(username3_name), 'time_{}'.format(username3_name), '',
+            'words_with_similar_annotation_12', 'words_with_similar_annotation_13', 'words_with_similar_annotation_23',
+            'total_words', 'Cohen_Kappa_12', 'Cohen_Kappa_13', 'Cohen_Kappa_23', 'Avg_Cohen_Kappa'
+        ]
+    else:
+        headers = [
+            'date_{}'.format(username1_name), 'tag_{}'.format(username1_name), 'link_{}'.format(username1_name), 
+            'hashtag_{}'.format(username1_name), 'time_{}'.format(username1_name), '',
+            'date_{}'.format(username2_name), 'tag_{}'.format(username2_name), 'link_{}'.format(username2_name), 
+            'hashtag_{}'.format(username2_name), 'time_{}'.format(username2_name), '',
+            'words_with_similar_annotation', 'total_words', 'Cohen_Kappa_Score'
+        ]
+
+    with open('csv/IAA.csv', 'w', encoding='utf-8', newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(headers)
+
+        for count in reversed(range(counter)):
+            # User 1 data
+            date_1 = sentTag1[count][0]
+            tag_1 = sentTag1[count][1]
+            link_1 = sentTag1[count][2]
+            hashtag_1 = sentTag1[count][3] if len(sentTag1[count]) > 3 and sentTag1[count][3] else []
+            time_1 = sentTag1[count][4] if len(sentTag1[count]) > 4 else ''
+
+            # User 2 data
+            date_2 = sentTag2[count][0]
+            tag_2 = sentTag2[count][1]
+            link_2 = sentTag2[count][2]
+            hashtag_2 = sentTag2[count][3] if len(sentTag2[count]) > 3 and sentTag2[count][3] else []
+            time_2 = sentTag2[count][4] if len(sentTag2[count]) > 4 else ''
+
+            empty = ''
+
+            if username3_name:
+                # User 3 data
+                date_3 = sentTag3[count][0]
+                tag_3 = sentTag3[count][1]
+                link_3 = sentTag3[count][2]
+                hashtag_3 = sentTag3[count][3] if len(sentTag3[count]) > 3 and sentTag3[count][3] else []
+                time_3 = sentTag3[count][4] if len(sentTag3[count]) > 4 else ''
+
+                ann1_tags = [elem['value'] for elem in tag_1]
+                ann2_tags = [elem['value'] for elem in tag_2]
+                ann3_tags = [elem['value'] for elem in tag_3]
+                total_words = len(tag_1)
+
+                if kappa_type == 'fleiss':
+                    # Calculate agreement for all three annotators
+                    words_with_similar_annotation_all = 0
+                    for index in range(total_words):
+                        if ann1_tags[index] == ann2_tags[index] == ann3_tags[index]:
+                            words_with_similar_annotation_all += 1
+
+                    # Calculate Fleiss' Kappa using statsmodels
+                    fleiss_ratings = prepare_fleiss_data_for_statsmodels(ann1_tags, ann2_tags, ann3_tags)
+                    fleiss_score = fleiss_kappa(fleiss_ratings)
+
+                    row = [
+                        date_1, tag_1, link_1, hashtag_1, time_1, empty,
+                        date_2, tag_2, link_2, hashtag_2, time_2, empty,
+                        date_3, tag_3, link_3, hashtag_3, time_3, empty,
+                        words_with_similar_annotation_all, total_words, fleiss_score
+                    ]
+
+                    # Filter based on Fleiss' Kappa threshold
+                    if float(str(fleiss_score)) >= float(kappa):
+                        writer.writerow(row)
+
+                else:  # Cohen's Kappa for pairwise comparisons
+                    words_with_similar_annotation_12 = 0
+                    words_with_similar_annotation_13 = 0
+                    words_with_similar_annotation_23 = 0
+
+                    for index in range(total_words):
+                        if ann1_tags[index] == ann2_tags[index]:
+                            words_with_similar_annotation_12 += 1
+                        if ann1_tags[index] == ann3_tags[index]:
+                            words_with_similar_annotation_13 += 1
+                        if ann2_tags[index] == ann3_tags[index]:
+                            words_with_similar_annotation_23 += 1
+
+                    # Calculate Cohen's Kappa for each pair
+                    kappa_score_12 = cohen_kappa_score(ann1_tags, ann2_tags, labels=None, weights=None)
+                    kappa_score_13 = cohen_kappa_score(ann1_tags, ann3_tags, labels=None, weights=None)
+                    kappa_score_23 = cohen_kappa_score(ann2_tags, ann3_tags, labels=None, weights=None)
+                    avg_kappa = (kappa_score_12 + kappa_score_13 + kappa_score_23) / 3
+
+                    row = [
+                        date_1, tag_1, link_1, hashtag_1, time_1, empty,
+                        date_2, tag_2, link_2, hashtag_2, time_2, empty,
+                        date_3, tag_3, link_3, hashtag_3, time_3, empty,
+                        words_with_similar_annotation_12, words_with_similar_annotation_13, words_with_similar_annotation_23,
+                        total_words, kappa_score_12, kappa_score_13, kappa_score_23, avg_kappa
+                    ]
+
+                    if float(str(avg_kappa)) >= float(kappa):
+                        writer.writerow(row)
+
+            else:
+                words_with_similar_annotation = 0
+                total_words = 0
+                for index in range(len(tag_1)):
+                    if tag_1[index]['value'] == tag_2[index]['value']:
+                        words_with_similar_annotation += 1
+                    total_words += 1
+
+                ann1_tags = [elem['value'] for elem in tag_1]
+                ann2_tags = [elem['value'] for elem in tag_2]
+                kappa_score = cohen_kappa_score(ann1_tags, ann2_tags, labels=None, weights=None)
+
+                row = [
+                    date_1, tag_1, link_1, hashtag_1, time_1, empty,
+                    date_2, tag_2, link_2, hashtag_2, time_2, empty,
+                    words_with_similar_annotation, total_words, kappa_score
+                ]
+
+                if float(str(kappa_score)) >= float(kappa):
+                    writer.writerow(row)
+
+            counter -= 1
+
+    return send_file('csv/IAA.csv', as_attachment=True)
+
 
 @app.route('/submit-matrix-sentence', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 # @is_logged_in
 def submit_mat_sentence():
-    lid_collection = database.get_collection('matrix')
+    matrix_collection = database.get_collection('matrix')
     requestdata = json.loads(request.data)
     print(requestdata)
     requestdata = json.loads(requestdata['body'])
 
+    sentence = requestdata.get('sentence')
     mat_id = requestdata.get('mat_id', None)
     selected = requestdata.get('selected')
     username = requestdata.get('username', None)
     date = requestdata.get('date', None)
     timeDifference = requestdata.get('timeDifference', None)
+    feedback = requestdata.get('feedback', None)
 
-    lst = [selected, date, timeDifference]
-    # print("list", lst)
+    new_entry = [selected, sentence, date, timeDifference, feedback]
 
-    lid_collection.update_one({'username': username}, {
-         '$set': {'mat_id': mat_id},
-            '$push': {'matrixTag': lst}
+    user_data = matrix_collection.find_one({'username': username})
+
+    if not user_data:
+        return jsonify({'result': 'User Not Found.'})
+    for entry in user_data.get('matrixTag', []):
+        if (
+            entry[2] == date and  
+            entry[3] == timeDifference and 
+            json.dumps(entry[0], sort_keys=True) == json.dumps(selected, sort_keys=True)  # selected tags match
+        ):
+            return jsonify({'result': 'Duplicate Entry. Not Stored.'})
+
+    matrix_collection.update_one({'username': username}, {
+        '$set': {'mat_id': mat_id},
+        '$push': {'matrixTag': new_entry}
     })
+
     return jsonify({'result': 'Message Stored Successfully'})
+
 
 @app.route('/submit-pos-sentence', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
-# @is_logged_in
 def submit_pos_sentence():
     user_collection = database.get_collection('pos')
     requestdata = json.loads(request.data)
@@ -798,33 +1363,101 @@ def submit_pos_sentence():
     timeDifference = requestdata['timeDifference']
     feedback = requestdata.get('feedback', None)
 
-    lst = [date, timeDifference, pos_tag, feedback]
-   # print(lst)
+    new_entry = [date, timeDifference, pos_tag, feedback]
 
-    user_collection.update_one({'username': username}, {
-        '$set': {'pos_id': pos_id},
-        '$push': {'posTag': lst}
-    })
+    if any(new_entry):
+        user_data = user_collection.find_one({'username': username})
 
+        if user_data:
+            for entry in user_data.get('posTag', []):
+                if (
+                    entry[0] == date and
+                    entry[1] == timeDifference and
+                    json.dumps(entry[2], sort_keys=True) == json.dumps(pos_tag, sort_keys=True)
+                ):
+                    return jsonify({'result': 'Duplicate Entry. Not Stored.'})
+
+            user_collection.update_one({'username': username}, {
+                '$set': {'pos_id': pos_id},
+                '$push': {'posTag': new_entry}
+            })
+            return jsonify({'result': 'Message Stored Successfully'})
+        else:
+            return jsonify({'result': 'User Not Found.'})
+
+
+@app.route('/submit-ner-sentence', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+# @is_logged_in
+def submit_ner_sentence():
+    ner_collection = database.get_collection('ner')
+    requestdata = json.loads(request.data)
+    print(requestdata)
+    requestdata = json.loads(requestdata['body'])
+
+    ner_id = requestdata.get('ner_id')
+    ner_tag = requestdata.get('ner_tag')
+    username = requestdata.get('username')
+    date = requestdata.get('date', None)
+    timeDifference = requestdata.get('timeDifference', None)
+    feedback = requestdata.get('feedback', None)
+
+    new_entry = [date, timeDifference, ner_tag, feedback]
+
+    if any(new_entry):
+        user_data = ner_collection.find_one({'username': username})
+
+        if user_data:
+            for entry in user_data.get('nerTag', []):
+                if (
+                    entry[0] == date and  
+                    entry[1] == timeDifference and  
+                    json.dumps(entry[2], sort_keys=True) == json.dumps(ner_tag, sort_keys=True) 
+                ):
+                    return jsonify({'result': 'Duplicate Entry. Not Stored.'})
+
+            ner_collection.update_one({'username': username}, {
+                '$set': {'ner_id': ner_id},
+                '$push': {'nerTag': new_entry}
+            })
+            return jsonify({'result': 'Message Stored Successfully'})
+        else:
+            return jsonify({'result': 'User Not Found.'})
+    else:
+        return jsonify({'result': 'No valid data provided.'})
+
+@app.route('/submit-translation', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+# @is_logged_in
+def submit_trans_sentence():
+    translation_collection = database.get_collection('translation')
+    requestdata = json.loads(request.data)
+    print(requestdata)
+    requestdata = json.loads(requestdata['body'])
+
+    trans_id = requestdata.get('trans_id')
+    sentence = requestdata.get('sentence')
+    eng_tags = requestdata.get('englishTranslation')
+    RH_tags = requestdata.get('hindiTranslation')
+    DH_tags = requestdata.get('texttrans')
+    username = requestdata.get('username')
+    date = requestdata.get('date', None)
+    timeDifference = requestdata.get('timeDifference', None)
+    feedback = requestdata.get('feedback', None)
+
+    lst = [ date, timeDifference, sentence, eng_tags, RH_tags, DH_tags, feedback ]
+
+    translation_collection.update_one(
+        {'username': username}, 
+        {
+            '$set': {'trans_id': trans_id},  
+            '$addToSet': {'transTag': lst}  
+        },
+        upsert=True  
+)
     return jsonify({'result': 'Message Stored Successfully'})
 
-# @app.route('/tokenize-en', methods=['POST'])
-# # @is_logged_in
-# def tokenize_en():
-#     sentences_collection = database.get_collection('sentences')
-#     requestdata = json.loads(request.data)
-#     print(requestdata)
-#     requestdata = json.loads(requestdata['body'])
 
-#     sentId = requestdata['id']
-#     print(sentId)
-#     result = sentences_collection.find({'sid': sentId})
-#     data = list(result)
-#     data = data[0]
-#     sentence = data['sentence']
-#     print(sentence)
-
-#     return jsonify({'result': 'Message Stored Successfully'})
 
 @app.route('/get-edit-sentence', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
@@ -832,7 +1465,7 @@ def submit_pos_sentence():
 def get_edit_sentence():
     user_collection = database.get_collection('lid')
     requestdata = json.loads(request.data)
-    print(requestdata)
+    # print(requestdata)
     requestdata = json.loads(requestdata['body'])
 
     sentId = requestdata['id']
@@ -857,7 +1490,6 @@ def get_mat_edit_sentence():
 
     mat_id = requestdata['id']
     username = requestdata['logged_in_user']
-    # print("pos_id",pos_id)
 
     user = user_collection.find({'username': username})
     user = list(user)
@@ -895,6 +1527,64 @@ def pos_edit_sentence():
     else:
         return jsonify({'error': "No sentence found for the provided sentId"})
 
+@app.route('/ner-edit-sentence', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+# @is_logged_in
+def ner_edit_sentence():
+    sentences_collection = database["ner"]
+    requestdata = json.loads(request.data)
+    print("request", requestdata)
+    ner_id = requestdata['id']
+    username = requestdata['logged_in_user']
+    print("ner_id",ner_id)
+
+    result = sentences_collection.find({'username': username})
+    data = list(result)
+
+    if data: 
+        data = data[0]
+        nerTag = data['nerTag'][ner_id-1]
+
+        result = {
+            'ner_id': ner_id,
+            'ner_tags': nerTag,
+            'message': "Sentence Fetched Successfully."
+        }
+        return jsonify({'result': result})
+    else:
+        return jsonify({'error': "No sentence found for the provided sentId"})
+
+
+@app.route('/trans-edit-sentence', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+# @is_logged_in
+def trans_edit_sentence():
+    sentences_collection = database["translation"]
+    requestdata = json.loads(request.data)
+    print("request", requestdata)
+    trans_id = requestdata.get('trans_id')
+    username = requestdata['logged_in_user']
+    print("trans_id",trans_id)
+
+    result = sentences_collection.find({'username': username})
+    data = list(result)
+
+    if data: 
+        data = data[0]
+        transTag = data['transTag'][trans_id-1]
+
+        result = {
+                'trans_id': trans_id,
+                'sentence': transTag[2],  
+                'eng_tags': transTag[3],  
+                'RH_tags': transTag[4],  
+                'DH_tags': transTag[5], 
+                'message': "Sentence Fetched Successfully."
+            }
+        return jsonify({'result': result})
+    else:
+        return jsonify({'error': "No sentence found for the provided sentId"})
+
 @app.route('/submit-edit-sentence', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 # @is_logged_in
@@ -905,19 +1595,19 @@ def submit_edit_sentence():
     requestdata = json.loads(requestdata['body'])
 
     sentId = requestdata['sentId']
-    selected = requestdata['selected']
     tag = requestdata['tag']
     username = requestdata['username']
     date = requestdata['date']
     hypertext = requestdata.get('hypertext', None)
     hashtags = requestdata.get('hashtags', None)
     timeDifference = requestdata['timeDifference']
+    feedback = requestdata.get('feedback', None)
 
-    lst = [selected, date, tag, hypertext, hashtags, timeDifference]
+    lst = [date, tag, hypertext, hashtags, timeDifference, feedback]
 
-    #print(lst)
+    print(lst)
 
-    print(sentId, selected, tag, username)
+    print(sentId, tag, username)
 
     user = user_collection.find({'username': username})
     user = list(user)
@@ -945,8 +1635,9 @@ def submit_pos_edit_sentence():
     username = requestdata['username']
     date = requestdata['date']
     timeDifference = requestdata['timeDifference']
+    feedback = requestdata.get('feedback', None)
 
-    lst = [date, timeDifference, pos_tag]
+    lst = [date, timeDifference, pos_tag, feedback]
     print(pos_id, pos_tag, username)
     user = user_collection.find({'username': username})
     user = list(user)
@@ -963,6 +1654,82 @@ def submit_pos_edit_sentence():
 
     return jsonify({'result': 'Message Stored Successfully'})
 
+
+@app.route('/submit-ner-edit-sentence', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+# @is_logged_in
+def submit_ner_edit_sentence():
+    user_collection = database.get_collection('ner')
+    requestdata = json.loads(request.data)
+    print(requestdata)
+    requestdata = json.loads(requestdata['body'])
+    print(requestdata)
+
+    ner_id = int(requestdata['ner_id']) 
+    ner_tag = requestdata['ner_tag']
+    username = requestdata['username']
+    date = requestdata['date']
+    timeDifference = requestdata['timeDifference']
+    feedback = requestdata.get('feedback', None)
+
+    lst = [date, timeDifference, ner_tag, feedback]
+    print(ner_id, ner_tag, username)
+    user = user_collection.find({'username': username})
+    user = list(user)
+    nerTag = user[0]['nerTag']
+    if 0 <= ner_id - 1 < len(nerTag):
+        nerTag[ner_id - 1] = lst  
+    else:
+        print("Invalid pos_id")
+
+    user_collection.update_one({'username': username}, {
+        '$set': {'nerTag': nerTag}
+    })
+
+    return jsonify({'result': 'Message Stored Successfully'})
+
+@app.route('/submit-edit-translation', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+def submit_edit_translation():
+    translation_collection = database.get_collection('translation')
+
+    requestdata = json.loads(request.data)
+    requestdata = json.loads(requestdata['body'])
+
+    trans_id = int(requestdata.get('trans_id'))  
+    sentence = requestdata.get('sentence')
+    eng_tags = requestdata.get('englishTranslation')
+    RH_tags = requestdata.get('hindiTranslation')
+    DH_tags = requestdata.get('texttrans')
+    username = requestdata.get('username')
+    date = requestdata.get('date', None)
+    timeDifference = requestdata.get('timeDifference', None)
+    feedback = requestdata.get('feedback', None)
+
+    lst = [date, timeDifference, sentence, eng_tags, RH_tags, DH_tags, feedback]
+
+    user = translation_collection.find_one({'username': username})
+    if user:
+        transTag = user.get('transTag', [])
+        if 0 <= trans_id - 1 < len(transTag):
+            transTag[trans_id - 1] = lst  
+        else:
+            transTag.append(lst)
+
+        translation_collection.update_one(
+            {'username': username},
+            {'$set': {'transTag': transTag}}
+        )
+        return jsonify({'result': 'Translation Updated Successfully'})
+    else:
+        new_user_data = {
+            'username': username,
+            'transTag': [lst]
+        }
+        translation_collection.insert_one(new_user_data)
+        return jsonify({'result': 'New Translation Created Successfully'})
+
+
 @app.route('/submit-mat-edit-sentence', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 # @is_logged_in
@@ -974,13 +1741,13 @@ def submit_mat_edit_sentence():
 
     mat_id = requestdata['mat_id']
     selected = requestdata['selected']
+    sentence = requestdata['sentence']
     username = requestdata['username']
     date = requestdata['date']
     timeDifference = requestdata['timeDifference']
+    feedback = requestdata.get('feedback', None)
 
-    lst = [selected, date, timeDifference]
-
-    #print(lst)
+    lst = [selected, sentence, date, timeDifference, feedback]
 
     print(mat_id, selected, username)
 
@@ -999,7 +1766,6 @@ def submit_mat_edit_sentence():
 
     return jsonify({'result': 'Message Stored Successfully'})
 
-
 @app.route('/all-sentences', methods=['GET', 'POST'])
 # @is_logged_in
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
@@ -1010,55 +1776,79 @@ def all_sentence():
     requestdata = json.loads(requestdata['body'])
 
     username = json.loads(requestdata['username'])
-    start = int(requestdata['start']-1)
+    
+    if 'start' in requestdata:
+        start_value = requestdata.get('start')
+        
+        if start_value is not None:
+            start = int(start_value) - 1
+        else:
+            start = 0
+    else:
+        raise ValueError("Missing or invalid 'start' value in requestdata")
+    
     end = start + 15
     print('username: ', username)
-    
+
     result = user_collection.find_one({'username': username})
     if not result:
-        return jsonify({'error': 'User not found'}), 404
+        return jsonify({'result': [], 'total_count': 0})
 
     sent_tags = result.get('sentTag', [])
-    print(sent_tags)
+    total_count = len(sent_tags)  # Get total count of all sentence tags
+
     if end > len(sent_tags):
         end = len(sent_tags)
+    
     sent_tags_range = sent_tags[start:end]
 
-    return jsonify({'result': sent_tags_range})
+    return jsonify({
+        'result': sent_tags_range,
+        'total_count': total_count  
+    })
 
 
-@app.route('/all-m-sentences', methods=['GET', 'POST'])
-# @is_logged_in
-@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+@app.route('/all-m-sentences', methods=['POST'])
 def all_m_sentence():
-    user_collection = database.get_collection('lid')
     matrix_collection = database.get_collection('matrix')
     requestdata = json.loads(request.data)
     requestdata = json.loads(requestdata['body'])
 
     username = json.loads(requestdata['username'])
-    start = int(requestdata['start'] - 1)
+    matrix_result = matrix_collection.find_one({'username': username})
+    print("matrix_result:", matrix_result)
+    
+    if 'start' in requestdata:
+        start_value = requestdata.get('start')
+        
+        if start_value is not None:
+            start = int(start_value) - 1
+        else:
+            start = 0
+    else:
+        raise ValueError("Missing or invalid 'start' value in requestdata")
+    
     end = start + 15
-
-    result = user_collection.find_one({'username': username})
-    sent_tags = result.get('sentTag', [])
+    print('username: ', username)
 
     matrix_result = matrix_collection.find_one({'username': username})
     if not matrix_result:
-        return jsonify({'error': 'Matrix tags not found'}), 404
+        return jsonify({'result': [], 'total_count': 0})
 
     matrix_tags = matrix_result.get('matrixTag', [])
-    
+    total_count = len(matrix_tags)  
+    print(matrix_result)
     if end > len(matrix_tags):
         end = len(matrix_tags)
     
-    sent_tags_range = sent_tags[start:end]
+    matrix_tags_range = matrix_tags[start:end]
 
-    return jsonify({'result': sent_tags_range})
-
+    return jsonify({
+        'result': matrix_tags_range,
+        'total_count': total_count  
+    })
 
 @app.route('/all-pos-sentences', methods=['GET', 'POST'])
-# @is_logged_in
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def all_pos_sentence():
     user_collection = database.get_collection('pos')
@@ -1066,23 +1856,94 @@ def all_pos_sentence():
     print("Request data:", requestdata)
     requestdata = json.loads(requestdata['body'])
     username = json.loads(requestdata['username'])
-    start = int(requestdata['start']-1)
+    start = int(requestdata.get('start', 1)) - 1
     end = start + 15
     print('username: ', username)
 
-    result = user_collection.find_one({'username': username})
-    
-    if not result or 'posTag' not in result:
+    user_data = user_collection.find_one({'username': username})
+    if not user_data or 'posTag' not in user_data:
         return jsonify({'result': []}), 404
-    
-    pos_tags = result['posTag']
-    
+
+    pos_tags = user_data['posTag']
     if end > len(pos_tags):
         end = len(pos_tags)
     pos_tags_range = pos_tags[start:end]
 
-    return jsonify({'result': pos_tags_range})
+    return jsonify({
+        'result': pos_tags_range,
+        'total_count': len(pos_tags),
+        'start': start + 1,
+        'end': end
+    })
+
+
+@app.route('/all—t-sentences', methods=['GET', 'POST'])
+# @is_logged_in
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+def all_t_sentence():
+    translation_collection = database.get_collection('translation')
+    requestdata = json.loads(request.data)
+    requestdata = json.loads(requestdata['body'])
+    print(requestdata)
+    username = json.loads(requestdata['username'])
+    
+    if 'start' in requestdata:
+        start_value = requestdata.get('start') 
+        if start_value is not None:
+            start = int(start_value) - 1
+        else:
+            start = 0  
+    else:
+        raise ValueError("Missing or invalid 'start' value in requestdata")
+    
+    end = start + 15
+
+    result = translation_collection.find_one({'username': username})
+    
+    if not result:
+        return jsonify({'result': [], 'total_count': 0})
+    
+    trans_tags = result.get('transTag', [])
+    total_count = len(trans_tags)  
+    
+    if end > len(trans_tags):
+        end = len(trans_tags)
+
+    trans_tags_range = trans_tags[start:end]
+
+    return jsonify({
+        'result': trans_tags_range,
+        'total_count': total_count  
+    })
+
+@app.route('/all-ner-sentences', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+def all_ner_sentence():
+    user_collection = database.get_collection('ner')
+    requestdata = json.loads(request.data)
+    print("Request data:", requestdata)
+    requestdata = json.loads(requestdata['body'])
+    username = json.loads(requestdata['username'])
+    start = int(requestdata.get('start', 1)) - 1
+    end = start + 15
+    print('username: ', username)
+
+    user_data = user_collection.find_one({'username': username})
+    if not user_data or 'nerTag' not in user_data:
+        return jsonify({'result': []}), 404
+
+    ner_tags = user_data['nerTag']
+    if end > len(ner_tags):
+        end = len(ner_tags)
+    ner_tags_range = ner_tags[start:end]
+
+    return jsonify({
+        'result': ner_tags_range,
+        'total_count': len(ner_tags),
+        'start': start + 1,
+        'end': end
+    })
 
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True, host='0.0.0.0', port=5000)
-

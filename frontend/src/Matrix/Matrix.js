@@ -13,7 +13,6 @@ import LanguageBtn from '../Components/LanguageBtn';
 import LanguageDetect from '../utils/LanguageDetect';
 import EnglishSplitter from '../utils/EnglishSplitter';
 import HindiSplitter from '../utils/HindiSplitter';
-import FetchSentence from '../utils/FetchSentence';
 
 import { StyledButton } from '../utils/styles';
 import MatrixRules from './MatrixRules';
@@ -98,6 +97,7 @@ const Matrix = props => {
 
         const data = {
             selected,
+            sentence,
             mat_id,
             username,
             date,
@@ -202,21 +202,8 @@ const StyledFlex = styled.div`
     align-items: center;
     gap: 6px;
     width: 75%;
-    margin: 10px auto;
+    margin: 0px auto;
     flex-wrap: wrap;
-`;
-
-const StyledWord = styled.div`
-    border-radius: 8px;
-    padding: 8px 8px;
-    text-align: center;
-
-    background-color: ${props => ((props.individualTag) === 'e') ? '#bbdfc8' : '#f3f2c9'};
-    background-color: ${props => ((props.individualTag) === 'u') && '#D4DCE9'};
-    cursor: pointer;
-    display:flex;
-    flex: 0 1 10%;
-    justify-content: center;
 `;
 
 

@@ -5,39 +5,34 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../Components/Navbar';
 
-const Profile = () => {
+const Profiletranslate = () => {
     const history = useNavigate();
     const [rows, setRows] = useState([{
-        id: 0, sentence: 'Dummy Sentence', grammar: 'e'
+        id: 0, sentence: 'Dummy Sentence', 
     }]);
-    const [rangeStart, setRangeStart] = useState(1);
+    const [rangeStart, setRangeStart] = useState(null); // Allow null instead of forcing 1
     const [page, setPage] = useState(0);
     const [totalCount, setTotalCount] = useState(0);
 
     const columns = [
         { field: 'id', headerName: "Sentence ID", width: 100 },
         { field: 'date', headerName: "Date", width: 110 },
-        { field: 'sentence', headerName: "Sentence", flex: 1, renderCell: (params) => {
-            const {row} = params;
-            const tagArray = row['sentence'];
-            if(tagArray !=='Dummy Sentence'){
-                return (<StyledFlexer>
-                    {tagArray && tagArray.map((elem, index) => {
-                        return (
-                            <StyledWord key={index} tokenTag={elem['value']}>{elem['key']}</StyledWord>
-                        );
-                    })}
-                </StyledFlexer>); 
-            } else {
-                return ("Dummy Sentence");
-            }
-        }},
+        {
+            field: 'sentence',
+            headerName: 'Sentence',
+            width: 1300,
+            renderCell: (params) => (
+                <StyledSentence>
+                    {params.row.sentence}
+                </StyledSentence>
+            ),
+        },
     ];
 
     const fetchAllSentences = async () => {
         const username = sessionStorage.getItem('annote_username');
         
-        let startValue = rangeStart || 1;
+        let startValue = rangeStart ? parseInt(rangeStart) : 1;
         if (page !== 0) {
             startValue = (page * 15) + 1;
         }
@@ -48,7 +43,7 @@ const Profile = () => {
         };
 
         try {
-            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/all-sentences`, {
+            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/all—t-sentences`, {
                 method: "POST",
                 headers: {
                   "Content-type": "application/json",
@@ -57,33 +52,37 @@ const Profile = () => {
                 body: JSON.stringify(data),
             });
 
+            console.log("Response from server:", res); // Log the response for debugging
+            
             let result = res.data.result;
+            console.log("result", result);
+            
             let rowArr = [];
             let sid = startValue;
 
-            const dateFormatter = d => {
-                return (
-                    d.split('T')[0]
-                );
+            const dateFormatter = (d) => {
+                if (typeof d === 'string') {
+                    return d.split('T')[0]; 
+                }
+                return d; 
             };
-
+        
             result.forEach((elem) => {
-                let sentence = "";
-                elem[1].forEach(word => {sentence = sentence + word['key'] + " "})
-                console.log(sentence);
-
+                const sentence = elem[2]; 
+        
                 const row = {
                     id: sid,
-                    date: dateFormatter(elem[0]),
-                    sentence: elem[1],
+                    date: dateFormatter(elem[0]), 
+                    sentence: sentence, 
                 };
+        
                 sid++;
-                console.log(row);
+                console.log(row); 
                 rowArr.push(row);
             });
-            
+        
             setRows(rowArr);
-            setTotalCount(res.data.total_count || result.length);
+            setTotalCount(res.data.total_count || result.length); 
         } catch (error) {
             console.error("Error fetching sentences:", error);
         }
@@ -104,33 +103,19 @@ const Profile = () => {
     return (
         <div>
             <Navbar />
-            <div style={{ margin: '70px 70px 10px 70px', display: 'flex', justifyContent: 'center', gap: '10px', alignItems: 'center' }}>
+            <div style={{ margin: '70px 70px 10px 70px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
                 <input
-                type="number"
-                value={rangeStart === null || rangeStart === undefined ? "" : rangeStart}
-                onChange={e => {
-                    const value = e.target.value;
-                    if (value === "" || value === null) {
-                        setRangeStart(""); // allow blank
-                    } else {
-                        const num = parseInt(value, 10);
-                        setRangeStart(isNaN(num) ? "" : num);
-                    }
-                }}
-                min="1"
-                style={{
-                    textAlign: 'center',
-                    height: '38px',
-                    padding: '10px 20px',
-                    fontSize: '16px',
-                    borderRadius: '5px',
-                    border: '1px solid #ccc',
-                    boxSizing: 'border-box'
-                }}
-                placeholder="Start"
-            />
-                    
-                <button
+                    type="number"
+                    value={rangeStart ?? ""}
+                    onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        setRangeStart(isNaN(value) || value < 1 ? null : value);
+                    }}
+                    min="1"
+                    style={{ textAlign: 'center' }}
+                    placeholder="Start"
+                />
+                <button 
                     onClick={handleRangeChange} 
                     style={{
                         backgroundColor: '#FFD700',
@@ -146,7 +131,6 @@ const Profile = () => {
                     Load Sentences
                 </button>
             </div>
-            
             <StyledDataGridContainer>
                 {rows.length > 0 && (
                     <DataGrid
@@ -162,7 +146,7 @@ const Profile = () => {
                             setRangeStart((newPage * 15) + 1);
                         }}
                         rowsPerPageOptions={[15]}
-                        onRowClick={(param) => history(`/edit/${param.row.id}`)}
+                        onRowClick={(param) => history(`/trans-edit/${param.row.id}`)}
                     />
                 )}      
                 {rows.length === 0 && (
@@ -175,7 +159,7 @@ const Profile = () => {
     );
 };
 
-export default Profile;
+export default Profiletranslate;
 
 const StyledDataGridContainer = styled.div`
     height: 80vh;
@@ -186,27 +170,19 @@ const StyledDataGridContainer = styled.div`
     cursor: pointer;
 `;
 
-const StyledWord = styled.div`
+const StyledSentence = styled.div`
     border-radius: 8px;
-    padding: 8px 8px;
+    padding: 8px;
     text-align: center;
-
-    display:flex;
-    flex: 0 1 10%;
-    justify-content: center;
-
-    background-color: ${props => props.tokenTag === 'e' && '#bbdfc8'};
-    background-color: ${props => props.tokenTag ==='h' && '#f3f2c9'};
-    background-color: ${props => props.tokenTag === 'u' && '#D4DCE9'};
-`;
-
-const StyledFlexer = styled.div`
-    display:flex;
+    display: flex;
     flex-direction: row;
     justify-content: start;
     align-items: center;
     gap: 4px;
+    font-size: 18px;
     overflow: hidden;
+    background-color: #efefef;
+    color: #333;
 `;
 
 const StyledMessage = styled.div`
@@ -219,4 +195,3 @@ const StyledMessage = styled.div`
     font-weight: bold;
     color: #333;
 `;
-

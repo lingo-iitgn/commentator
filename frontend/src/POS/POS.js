@@ -9,11 +9,42 @@ import { Button } from '@mui/material';
 
 import axios from 'axios';
 
-function err(){
-  return(
-    <h1>model is not up and running. please add correct api and start it in hugginface. Then reload the page and retry</h1>
-  )
-}
+
+const convertToIST = (utcDate) => {
+  return new Date(utcDate.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+};
+
+const getCurrentIST = () => {
+  return convertToIST(new Date());
+};
+
+const formatISTDate = (istDate) => {
+  const offset = istDate.getTimezoneOffset() * 60000;
+  const localISOTime = new Date(istDate.getTime() - offset).toISOString().slice(0, -1);
+  return localISOTime + '+05:30';
+};
+
+const formatDateTimeIST = (istDate) => {
+  const year = istDate.getFullYear();
+  const month = String(istDate.getMonth() + 1).padStart(2, '0');
+  const day = String(istDate.getDate()).padStart(2, '0');
+  
+  let hours = istDate.getHours();
+  const minutes = String(istDate.getMinutes()).padStart(2, '0');
+  const seconds = String(istDate.getSeconds()).padStart(2, '0');
+
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  const formattedHours = String(hours).padStart(2, '0');
+
+  return `${year}-${month}-${day} ${formattedHours}:${minutes}:${seconds} ${ampm}`;
+};
+
+const getDifferenceInSeconds = (date1, date2) => {
+  const diffMs = date1.getTime() - date2.getTime(); 
+  return Math.abs(Math.floor(diffMs / 1000)); 
+};
   
 const colorData = {
   "NOUN": "#fad",
@@ -56,61 +87,41 @@ const POS = () => {
     const [dummy, setDummy] = useState(null);
     const [isDataEmpty, setIsDataEmpty] = useState(false);
     const [feedbackVisible, setFeedbackVisible] = useState(false);
+    const [startTimeIST, setStartTimeIST] = useState(() => getCurrentIST());
 
-    const fetchPOSSentence = async () => {
-      const pos_id = JSON.parse(sessionStorage.getItem("pos_id"));
-     // console.log(pos_id)
-      const data = {
-        pos_id,
-      };
-      //console.log(data);
-      const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/fetch-pos-sent`,{
-          method: "POST",
-          headers: {
-              'Content-type': 'application-json',
-              'Access-Control-Allow-Origin': '*',
-          },
-          body: JSON.stringify(data)
+
+  const fetchPOSSentence = async () => {
+    const pos_id = JSON.parse(sessionStorage.getItem("pos_id"));
+    const data = { pos_id };
+  
+    try {
+      const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/fetch-pos-sent`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
+  
       console.log(res.data.result);
-
+  
       if (res.data.result.length > 0) {
         setText(res.data.result[0][0]);
         let tmp = JSON.parse(res.data.result[0][1]);
         setData(tmp);
         setIsDataEmpty(false); 
       } else {
-          setIsDataEmpty(true); 
+        setIsDataEmpty(true); 
       }
+  
+    } catch (error) {
+      console.error("Error fetching POS sentence:", error);
+    }
   };
+
 
   useEffect(() => {
     fetchPOSSentence();
+    setStartTimeIST(getCurrentIST());  
   }, []);
-
-    // const generateTag = async ()=>{
-    
-    //     const requestOptions = {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json','Authorization': 'Bearer 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' },
-    //     body:JSON.stringify({'inputs': text})
-    //     // body: JSON.stringify({ : 'React POST Request Example' })
-    //     };
-    //     fetch('https://api-inference.huggingface.co/models/sagorsarker/codeswitch-hineng-pos-lince',requestOptions)
-    //     .then((response) => response.json())
-    //     .then((data) => {
-    //         console.log(data);
-    //         setData(data);
-    //     })
-    //     // const res = await fetch('https://api-inference.huggingface.co/models/sagorsarker/codeswitch-hineng-pos-lince',requestOptions);
-    //     // tags = await  res.json();  
-    // }
-
-    // useEffect(() => {
-    //   console.log(typeof(data), data);
-    // }, [data, setData]);
-
-    const startTime = new Date();
 
 
     const changePOS = (e, index) => {
@@ -130,12 +141,11 @@ const POS = () => {
       data.map((element, index) => {
         let idx = dataArr.length - 1;
     
-        // Check if there's at least one element before accessing
         if (idx >= 0 && element.word.includes('#')) {
           let newWord = dataArr[idx].word + element.word;
           newWord = newWord.replaceAll('#', '');
     
-          let entity = element.entity; // Default entity 
+          let entity = element.entity; 
     
           if (dataArr[idx].entity === data[index].entity) {
             entity = dataArr[idx].entity;
@@ -167,7 +177,6 @@ const POS = () => {
               <div style={{ color: "#fefefe" }}>{element.word}</div>
               <StyledSelect key={index} index={index} data={data} style={{maxHeight: '100%', overflow: 'auto'}} defaultValue={element.entity} onChange={e => changePOS(e, index)}>
                 {posTags.map(pos => {
-                  //console.log(element.word)
                   
                   return(
                     <StyledWord individualTag={pos} key={pos} value={pos}>
@@ -184,26 +193,32 @@ const POS = () => {
     const onSubmitHandler = async (e, data_) => {
       e.preventDefault();
       console.log('Submitted = ', data_)
-      // setFeedback('');
       setFeedbackVisible(false);
 
       const username = JSON.parse(sessionStorage.getItem('annote_username'));
-      const date = new Date();
-      const endTime = new Date();
-
+      
+      const endTimeIST = getCurrentIST();
+      
       const pos_id = parseInt(sessionStorage.getItem('pos_id')) + 1;
       const pos_tag = data_;
 
-      const timeDifference = (endTime.getTime() - startTime.getTime()) / 1000;
-      console.log(timeDifference);
+      const timeDifference = getDifferenceInSeconds(endTimeIST, startTimeIST);
+
+      console.log('Time difference (seconds):', timeDifference);
+      console.log('Start time (IST):', formatDateTimeIST(startTimeIST));
+      console.log('End time (IST):', formatDateTimeIST(endTimeIST));
 
       const data = {
         pos_id,
         pos_tag,
         username,
-        date,
+        date: formatDateTimeIST(endTimeIST), 
+        startTime: formatDateTimeIST(startTimeIST), 
+        endTime: formatDateTimeIST(endTimeIST), 
+        fullTimestamp: formatISTDate(endTimeIST), 
         timeDifference,
         feedback,
+        timezone: 'IST'
     };
       const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/submit-pos-sentence`, {
           method: "POST",
@@ -218,12 +233,9 @@ const POS = () => {
       window.location.reload()
     };
 
-  let pos_id = JSON.parse(sessionStorage.getItem("pos_id"));
-
   return (
     <div className="App">
             <Navbar />
-            {/* <Leftbox /> */}
             <POSRules />
             {isDataEmpty ? (
                 <div className='Box'>
@@ -237,7 +249,7 @@ const POS = () => {
                     </div>
 
                     <div className='generatedBox'>
-                        <h3>Individual POS Tag</h3>
+                        <h3>Individual POS Tags</h3>
                         <StyledFlex>
                             {data && listItems}
                         </StyledFlex>
