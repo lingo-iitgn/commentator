@@ -297,7 +297,7 @@ It provides both annotator interface for efficient and faster annotation and adm
 > `username: commentator`  
 > `password: commentator`
 
-### 🔑 Admin Access
+For Admin Access
 
 > `username: admin`  
 > `password: admin`
