@@ -16,7 +16,7 @@ jupyter==1.1.1
 jupyterlab==4.4.3
 requests>=2.32.4
 httpx==0.27.2
-aiohttp==3.11.18
+aiohttp>=3.12.14
 python-dotenv==0.19.2
 tqdm==4.67.1
 pydantic==2.7.1
@@ -30,7 +30,7 @@ toml==0.10.2
 autopep8==1.6.0
 pycodestyle==2.8.0
 Cython==3.0.0a10
-pymongo==4.0.2
+pymongo>=4.6.3
 cachelib==0.6.0
 passlib==1.7.4
 dnspython>=2.6.1
