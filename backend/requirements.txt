@@ -9,7 +9,7 @@ MarkupSafe==3.0.2
 itsdangerous==2.2.0
 pandas==1.4.1
 numpy==1.24.3
-scikit-learn==1.0.2
+scikit-learn>=1.5.0
 sklearn==0.0
 matplotlib==3.8.2
 jupyter==1.1.1
@@ -33,7 +33,7 @@ Cython==3.0.0a10
 pymongo==4.0.2
 cachelib==0.6.0
 passlib==1.7.4
-dnspython==2.2.1
+dnspython>=2.6.1
 virtualenv>=20.26.6
 platformdirs==2.5.1
 distlib==0.3.4
