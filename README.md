@@ -187,7 +187,11 @@ b. Navigate inside frontend folder
 
 c. Install all frontend dependencies post 1st application download.
 
-    npm i 
+    npm install 
+
+> **Note:** For the Translation task, install the [`react-transliterate library`](https://www.npmjs.com/package/react-transliterate) with:
+
+    npm install --save react-transliterate --legacy-peer-deps
 
 d. Start the frontend local server.
 
