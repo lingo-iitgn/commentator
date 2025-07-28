@@ -78,24 +78,26 @@ const Navbar = () => {
                     </StyledUsername>
             )}
             <StyledUsername 
-                    style={{ 
-                        borderColor: 'transparent',
-                        textTransform: 'uppercase',
-                        backgroundColor: '#FDD835',
-                        color: '#ffffff',
-                        padding: '5px 10px',
-                        borderRadius: '5px',
-                        fontFamily: 'Arial, sans-serif',
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        boxShadow: '0 0 10px #FDD835'
-                    }} 
-                    onClick={() => history('/tasks')}
->
+            style={{ 
+                borderColor: 'transparent',
+                textTransform: 'uppercase',
+                backgroundColor: '#FDD835',
+                color: '#ffffff',
+                padding: '5px 10px',
+                borderRadius: '5px',
+                fontFamily: 'Arial, sans-serif',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                boxShadow: '0 0 10px #FDD835'
+            }} 
+                onClick={() => {
+                    if (!logged_in_admin) {
+                        history('/tasks');
+                    }
+                }}
+            >
             {logged_in_user}
             </StyledUsername>
-
-
 
             <StyledPowerOff onClick={logoutHandler}/>
         </StyledFlex>
