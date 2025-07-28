@@ -289,15 +289,15 @@ F. Stop Docker Container by Container ID.
            ```
   
      2. **Verify it's running (default port 27017):**
-         ```bash
-         netstat -an | grep 27017
-         ```
+           ```bash
+           netstat -an | grep 27017
+           ```
   
      3. **Check connection URI and credentials:**
-         Ensure it follows:
-         ```
-         mongodb://<username>:<password>@<host>:<port>/<dbname>
-         ```
+           Ensure it follows:
+           ```
+           mongodb://<username>:<password>@<host>:<port>/<dbname>
+           ```
 
 - 3. Docker Build Failed
 
