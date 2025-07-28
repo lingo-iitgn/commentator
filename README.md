@@ -270,7 +270,34 @@ F. Stop Docker Container by Container ID.
     ```
 - 2. MongoDB Connection Error
 
-    *Ensure MongoDB is running on the specified connection string.*
+     *Ensure MongoDB is running on the specified connection string.*
+     1. **Start MongoDB:**
+  
+         - **Mac (Homebrew):**
+           ```bash
+           brew services start mongodb-community@6.0
+           ```
+  
+         - **Linux:**
+           ```bash
+           sudo systemctl start mongod
+           ```
+  
+         - **Windows:**
+           ```powershell
+           net start MongoDB
+           ```
+  
+     2. **Verify it's running (default port 27017):**
+         ```bash
+         netstat -an | grep 27017
+         ```
+  
+     3. **Check connection URI and credentials:**
+         Ensure it follows:
+         ```
+         mongodb://<username>:<password>@<host>:<port>/<dbname>
+         ```
 
 - 3. Docker Build Failed
 
