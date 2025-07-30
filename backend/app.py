@@ -1104,211 +1104,482 @@ def submit_sentence():
         return jsonify({'result': 'No valid data provided.'})
 
 @app.route('/compare-annotators', methods=['GET', 'POST'])
-@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])  
 def compare_annotators():
     username1 = request.form.get('username1')
-    username2 = request.form.get('username2')
+    username2 = request.form.get('username2') 
     username3 = request.form.get('username3')  
     kappa = request.form.get('kappa')
-    kappa_type = request.form.get('kappa_type', 'cohen')  
-    print(username1, username2, username3, kappa, kappa_type)
+    kappa_type = request.form.get('kappa_type', 'cohen').lower()
+    task_type = request.form.get('task_type', 'lid').lower()
 
-    username1_name = username1
-    username2_name = username2
-    username3_name = username3 if username3 else None
-    
-    print('username1 = ', username1_name)
-    print('username2 = ', username2_name)
-    if username3_name:
-        print('username3 = ', username3_name)
+    if not username1 or not username2 or not kappa:
+        return "Missing required form parameters (username1, username2, kappa)", 400
+    if kappa_type == 'fleiss' and not username3:
+        return "Fleiss' Kappa requires 3 annotators", 400
+    try:
+        kappa_threshold = float(kappa)
+    except ValueError:
+        return "Invalid kappa threshold; must be a number", 400
 
-    user_collection = database.get_collection('lid')
-    username1 = user_collection.find({'username': username1_name})
-    username2 = user_collection.find({'username': username2_name})
-    
-    user1 = list(username1)
-    user2 = list(username2)
-    
-    if username3_name:
-        username3 = user_collection.find({'username': username3_name})
-        user3 = list(username3)
-        print('USER 3 = ', user3)
-        counter = min(int(user1[0]['sentId']), int(user2[0]['sentId']), int(user3[0]['sentId']))
-    else:
-        counter = min(int(user1[0]['sentId']), int(user2[0]['sentId']))
+    task_collection_mapping = {
+        'lid': 'lid',
+        'ner': 'ner', 
+        'pos': 'pos',
+        'matrix': 'matrix'
+    }
+    collection_name = task_collection_mapping.get(task_type)
+    user_collection = database.get_collection(collection_name)
 
-    print('USER 1 = ', user1)
-    print('USER 2 = ', user2)
-    print(counter)
+    sentence_format = {
+        'lid': {'date': 0, 'tags': 1, 'link': 2, 'hashtag': 3, 'time': 4},
+        'ner': {'date': 0, 'time': 1, 'tags': 2},
+        'pos': {'date': 0, 'time': 1, 'tags': 2},
+        'matrix': {'tags': 0, 'sentence': 1, 'date': 2, 'time': 3, 'feedback': 4}
+    }
+    format_map = sentence_format.get(task_type)
+    if not format_map:
+        return f"Unsupported task_type '{task_type}' in sentence format", 400
 
-    sentTag1 = user1[0]['sentTag']
-    sentTag2 = user2[0]['sentTag']
-    sentTag3 = user3[0]['sentTag'] if username3_name else None
+    tag_field_map = {
+        'lid': 'sentTag',
+        'ner': 'nerTag',
+        'pos': 'posTag',
+        'matrix': 'matrixTag'
+    }
+    tag_field = tag_field_map.get(task_type)
+    if not tag_field:
+        return f"Tag field mapping not found for task '{task_type}'", 400
 
-    def prepare_fleiss_data_for_statsmodels(ann1_tags, ann2_tags, ann3_tags=None):
-        all_annotations = ann1_tags + ann2_tags
-        if ann3_tags:
-            all_annotations += ann3_tags
-        all_categories = sorted(list(set(all_annotations)))
+    user1_doc = user_collection.find_one({'username': username1})
+    user2_doc = user_collection.find_one({'username': username2})
+    if not user1_doc:
+        return f"No data found for user '{username1}' in collection '{collection_name}'", 404
+    if not user2_doc:
+        return f"No data found for user '{username2}' in collection '{collection_name}'", 404
+    user3_doc = user_collection.find_one({'username': username3}) if username3 else None
+    if username3 and not user3_doc:
+        return f"No data found for user '{username3}' in collection '{collection_name}'", 404
+
+    for doc, uname in [(user1_doc, username1), (user2_doc, username2)] + ([(user3_doc, username3)] if user3_doc else []):
+        if tag_field not in doc:
+            return f"User '{uname}' document missing '{tag_field}' field", 400
+        if not isinstance(doc[tag_field], list):
+            return f"User '{uname}' '{tag_field}' field is not a list", 400
+        if len(doc[tag_field]) == 0:
+            return f"User '{uname}' '{tag_field}' field list is empty", 400
+
+    sent1 = user1_doc[tag_field]
+    sent2 = user2_doc[tag_field]
+    sent3 = user3_doc[tag_field] if user3_doc else None
+    counter = min(len(sent1), len(sent2), len(sent3) if sent3 else len(sent1))
+
+    if task_type == 'matrix':
+        filename = f'csv/IAA_MATRIX_{kappa_type}.csv'
+        os.makedirs('csv', exist_ok=True)
         
-        n_items = len(ann1_tags)
-        n_categories = len(all_categories)
-        cat_to_idx = {cat: idx for idx, cat in enumerate(all_categories)}
-        
-        ratings_matrix = np.zeros((n_items, n_categories), dtype=int)
-        
-        for i in range(n_items):
-            annotations = [ann1_tags[i], ann2_tags[i]]
-            if ann3_tags:
-                annotations.append(ann3_tags[i])
+        def calculate_fleiss_kappa_per_sentence(a1, a2, a3):
+            """Calculate Fleiss' Kappa for a single sentence with 3 annotators"""
+            try:
+                if fleiss_kappa is None:
+                    if a1 == a2 == a3:
+                        return 1.0
+                    elif a1 == a2 or a1 == a3 or a2 == a3:
+                        return 0.5
+                    else:
+                        return 0.0
+                
+                labels = [a1, a2, a3]
+                
+                h_count = labels.count('h')
+                e_count = labels.count('e')
+                
+                ratings_matrix = np.array([[h_count, e_count]], dtype=int)
+                
+                total_ratings = h_count + e_count
+                if total_ratings != 3: 
+                    return 0.0
+
+                if h_count == 3 or e_count == 3:
+                    return 1.0
+                
+                if h_count == 2 or e_count == 2:
+                    return 0.5
+                
+                kappa_score = fleiss_kappa(ratings_matrix, method='fleiss')
+                return kappa_score if not np.isnan(kappa_score) else 0.0
+                
+            except Exception as e:
+                print(f"Error in Fleiss calculation: {e}")
+                if a1 == a2 == a3:
+                    return 1.0
+                elif a1 == a2 or a1 == a3 or a2 == a3:
+                    return 0.5
+                else:
+                    return 0.0
+        filename = f'csv/IAA_MATRIX_{kappa_type}.csv'
+        os.makedirs('csv', exist_ok=True)
             
-            for ann in annotations:
-                if ann in cat_to_idx:
-                    ratings_matrix[i, cat_to_idx[ann]] += 1
+        def create_sentence_dict(sent_data, username):
+            sentence_dict = {}
+            for i, entry in enumerate(sent_data):
+                print(f"Processing entry {i} for {username}: {entry}")
+                if len(entry) >= 2:  
+                    label = entry[0]
+                    sentence = entry[1]
+                    sentence_dict[sentence] = entry
+                    print(f"  Added to dict: sentence='{sentence[:50]}...', label='{label}'")
+            return sentence_dict
         
-        return ratings_matrix
-
-    if kappa_type == 'fleiss' and username3_name:
-        headers = [
-            'date_{}'.format(username1_name), 'tag_{}'.format(username1_name), 'link_{}'.format(username1_name), 
-            'hashtag_{}'.format(username1_name), 'time_{}'.format(username1_name), '',
-            'date_{}'.format(username2_name), 'tag_{}'.format(username2_name), 'link_{}'.format(username2_name), 
-            'hashtag_{}'.format(username2_name), 'time_{}'.format(username2_name), '',
-            'date_{}'.format(username3_name), 'tag_{}'.format(username3_name), 'link_{}'.format(username3_name), 
-            'hashtag_{}'.format(username3_name), 'time_{}'.format(username3_name), '',
-            'words_with_similar_annotation_all', 'total_words', 'Fleiss_Kappa'
-        ]
-    elif username3_name:
-        headers = [
-            'date_{}'.format(username1_name), 'tag_{}'.format(username1_name), 'link_{}'.format(username1_name), 
-            'hashtag_{}'.format(username1_name), 'time_{}'.format(username1_name), '',
-            'date_{}'.format(username2_name), 'tag_{}'.format(username2_name), 'link_{}'.format(username2_name), 
-            'hashtag_{}'.format(username2_name), 'time_{}'.format(username2_name), '',
-            'date_{}'.format(username3_name), 'tag_{}'.format(username3_name), 'link_{}'.format(username3_name), 
-            'hashtag_{}'.format(username3_name), 'time_{}'.format(username3_name), '',
-            'words_with_similar_annotation_12', 'words_with_similar_annotation_13', 'words_with_similar_annotation_23',
-            'total_words', 'Cohen_Kappa_12', 'Cohen_Kappa_13', 'Cohen_Kappa_23', 'Avg_Cohen_Kappa'
-        ]
-    else:
-        headers = [
-            'date_{}'.format(username1_name), 'tag_{}'.format(username1_name), 'link_{}'.format(username1_name), 
-            'hashtag_{}'.format(username1_name), 'time_{}'.format(username1_name), '',
-            'date_{}'.format(username2_name), 'tag_{}'.format(username2_name), 'link_{}'.format(username2_name), 
-            'hashtag_{}'.format(username2_name), 'time_{}'.format(username2_name), '',
-            'words_with_similar_annotation', 'total_words', 'Cohen_Kappa_Score'
-        ]
-
-    with open('csv/IAA.csv', 'w', encoding='utf-8', newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(headers)
-
-        for count in reversed(range(counter)):
-            # User 1 data
-            date_1 = sentTag1[count][0]
-            tag_1 = sentTag1[count][1]
-            link_1 = sentTag1[count][2]
-            hashtag_1 = sentTag1[count][3] if len(sentTag1[count]) > 3 and sentTag1[count][3] else []
-            time_1 = sentTag1[count][4] if len(sentTag1[count]) > 4 else ''
-
-            # User 2 data
-            date_2 = sentTag2[count][0]
-            tag_2 = sentTag2[count][1]
-            link_2 = sentTag2[count][2]
-            hashtag_2 = sentTag2[count][3] if len(sentTag2[count]) > 3 and sentTag2[count][3] else []
-            time_2 = sentTag2[count][4] if len(sentTag2[count]) > 4 else ''
-
-            empty = ''
-
-            if username3_name:
-                # User 3 data
-                date_3 = sentTag3[count][0]
-                tag_3 = sentTag3[count][1]
-                link_3 = sentTag3[count][2]
-                hashtag_3 = sentTag3[count][3] if len(sentTag3[count]) > 3 and sentTag3[count][3] else []
-                time_3 = sentTag3[count][4] if len(sentTag3[count]) > 4 else ''
-
-                ann1_tags = [elem['value'] for elem in tag_1]
-                ann2_tags = [elem['value'] for elem in tag_2]
-                ann3_tags = [elem['value'] for elem in tag_3]
-                total_words = len(tag_1)
-
-                if kappa_type == 'fleiss':
-                    # Calculate agreement for all three annotators
-                    words_with_similar_annotation_all = 0
-                    for index in range(total_words):
-                        if ann1_tags[index] == ann2_tags[index] == ann3_tags[index]:
-                            words_with_similar_annotation_all += 1
-
-                    # Calculate Fleiss' Kappa using statsmodels
-                    fleiss_ratings = prepare_fleiss_data_for_statsmodels(ann1_tags, ann2_tags, ann3_tags)
-                    fleiss_score = fleiss_kappa(fleiss_ratings)
-
-                    row = [
-                        date_1, tag_1, link_1, hashtag_1, time_1, empty,
-                        date_2, tag_2, link_2, hashtag_2, time_2, empty,
-                        date_3, tag_3, link_3, hashtag_3, time_3, empty,
-                        words_with_similar_annotation_all, total_words, fleiss_score
-                    ]
-
-                    # Filter based on Fleiss' Kappa threshold
-                    if float(str(fleiss_score)) >= float(kappa):
-                        writer.writerow(row)
-
-                else:  # Cohen's Kappa for pairwise comparisons
-                    words_with_similar_annotation_12 = 0
-                    words_with_similar_annotation_13 = 0
-                    words_with_similar_annotation_23 = 0
-
-                    for index in range(total_words):
-                        if ann1_tags[index] == ann2_tags[index]:
-                            words_with_similar_annotation_12 += 1
-                        if ann1_tags[index] == ann3_tags[index]:
-                            words_with_similar_annotation_13 += 1
-                        if ann2_tags[index] == ann3_tags[index]:
-                            words_with_similar_annotation_23 += 1
-
-                    # Calculate Cohen's Kappa for each pair
-                    kappa_score_12 = cohen_kappa_score(ann1_tags, ann2_tags, labels=None, weights=None)
-                    kappa_score_13 = cohen_kappa_score(ann1_tags, ann3_tags, labels=None, weights=None)
-                    kappa_score_23 = cohen_kappa_score(ann2_tags, ann3_tags, labels=None, weights=None)
-                    avg_kappa = (kappa_score_12 + kappa_score_13 + kappa_score_23) / 3
-
-                    row = [
-                        date_1, tag_1, link_1, hashtag_1, time_1, empty,
-                        date_2, tag_2, link_2, hashtag_2, time_2, empty,
-                        date_3, tag_3, link_3, hashtag_3, time_3, empty,
-                        words_with_similar_annotation_12, words_with_similar_annotation_13, words_with_similar_annotation_23,
-                        total_words, kappa_score_12, kappa_score_13, kappa_score_23, avg_kappa
-                    ]
-
-                    if float(str(avg_kappa)) >= float(kappa):
-                        writer.writerow(row)
-
-            else:
-                words_with_similar_annotation = 0
-                total_words = 0
-                for index in range(len(tag_1)):
-                    if tag_1[index]['value'] == tag_2[index]['value']:
-                        words_with_similar_annotation += 1
-                    total_words += 1
-
-                ann1_tags = [elem['value'] for elem in tag_1]
-                ann2_tags = [elem['value'] for elem in tag_2]
-                kappa_score = cohen_kappa_score(ann1_tags, ann2_tags, labels=None, weights=None)
-
-                row = [
-                    date_1, tag_1, link_1, hashtag_1, time_1, empty,
-                    date_2, tag_2, link_2, hashtag_2, time_2, empty,
-                    words_with_similar_annotation, total_words, kappa_score
+        dict1 = create_sentence_dict(sent1, username1)
+        dict2 = create_sentence_dict(sent2, username2)
+        dict3 = create_sentence_dict(sent3, username3) if sent3 else None
+        
+        common_sentences = set(dict1.keys()) & set(dict2.keys())
+        if dict3:
+            common_sentences &= set(dict3.keys())
+        
+        print(f"Found {len(common_sentences)} common sentences between users")
+        print(f"User data lengths - {username1}: {len(dict1)}, {username2}: {len(dict2)}")
+        if dict3:
+            print(f"{username3}: {len(dict3)}")
+        
+        with open(filename, 'w', encoding='utf-8', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            
+            if kappa_type == 'fleiss':
+                header = [
+                    f'sentence_{username1}', f'date_{username1}', f'time_{username1}', f'label_{username1}',
+                    f'sentence_{username2}', f'date_{username2}', f'time_{username2}', f'label_{username2}',
+                    f'sentence_{username3}', f'date_{username3}', f'time_{username3}', f'label_{username3}',
+                    'words_with_similar_annotation_all', 'total_sentences', f'Fleiss_Kappa_MATRIX'
                 ]
+                writer.writerow(header)
+                
+                rows_written = 0
+                for sentence_text in common_sentences:
+                    try:
+                        entry1 = dict1[sentence_text]
+                        entry2 = dict2[sentence_text]
+                        entry3 = dict3[sentence_text]
+                        
+                        print(f"Processing sentence: '{sentence_text[:50]}...'")
+                        print(f"  Entry1: {entry1}")
+                        print(f"  Entry2: {entry2}")
+                        print(f"  Entry3: {entry3}")
+                        
+                        a1 = entry1[0] if len(entry1) > 0 else None
+                        a2 = entry2[0] if len(entry2) > 0 else None
+                        a3 = entry3[0] if len(entry3) > 0 else None
+                        
+                        date1 = entry1[2] if len(entry1) > 2 else ''
+                        time1 = entry1[3] if len(entry1) > 3 else ''
+                        date2 = entry2[2] if len(entry2) > 2 else ''
+                        time2 = entry2[3] if len(entry2) > 3 else ''
+                        date3 = entry3[2] if len(entry3) > 2 else ''
+                        time3 = entry3[3] if len(entry3) > 3 else ''
+                        
+                        print(f"  Extracted labels: a1={a1}, a2={a2}, a3={a3}")
+                        
+                        if a1 not in ['h', 'e'] or a2 not in ['h', 'e'] or a3 not in ['h', 'e']:
+                            print(f"  Skipping due to invalid annotations")
+                            continue
+                        
+                        try:
+                            fleiss_score = calculate_fleiss_kappa_per_sentence(a1, a2, a3)
+                            if np.isnan(fleiss_score) or fleiss_score is None:
+                                if a1 == a2 == a3:
+                                    fleiss_score = 1.0  
+                                else:
+                                    fleiss_score = 0.0  
+                            print(f"  Calculated Fleiss Kappa: {fleiss_score}")
+                        except Exception as e:
+                            print(f"  Error calculating Fleiss kappa: {e}")
+                            if a1 == a2 == a3:
+                                fleiss_score = 1.0
+                            elif a1 == a2 or a1 == a3 or a2 == a3:
+                                fleiss_score = 0.5  
+                            else:
+                                fleiss_score = 0.0 
+                        
+                        identical = 1 if (a1 == a2 == a3) else 0
+                        
+                        row = [
+                            sentence_text, date1, time1, a1,
+                            sentence_text, date2, time2, a2, 
+                            sentence_text, date3, time3, a3,
+                            identical, 1, fleiss_score
+                        ]
+                        
+                        writer.writerow(row)
+                        rows_written += 1
+                        print(f"  Written row {rows_written}: Fleiss Kappa = {fleiss_score:.4f}")
+                        
+                        if fleiss_score < kappa_threshold:
+                            print(f"    (Below threshold {kappa_threshold}, but still included)")
+                        
+                    except Exception as e:
+                        print(f"Error processing sentence '{sentence_text[:50]}...': {e}")
+                        continue
+                
+                print(f"Total rows written for Fleiss: {rows_written}")
+            
+            else: 
+                header = [
+                    f'sentence_{username1}', f'date_{username1}', f'time_{username1}', f'label_{username1}',
+                    f'sentence_{username2}', f'date_{username2}', f'time_{username2}', f'label_{username2}',
+                    'words_with_similar_annotation', 'total_sentences', f'Cohen_Kappa_Score_MATRIX'
+                ]
+                writer.writerow(header)
+                
+                rows_written = 0
+                for sentence_text in common_sentences:
+                    try:
+                        entry1 = dict1[sentence_text]
+                        entry2 = dict2[sentence_text]
+                        
+                        print(f"Processing sentence: '{sentence_text[:50]}...'")
+                        print(f"  Entry1: {entry1}")
+                        print(f"  Entry2: {entry2}")
+                        
+                        a1 = entry1[0] if len(entry1) > 0 else None
+                        a2 = entry2[0] if len(entry2) > 0 else None
+                        
+                        date1 = entry1[2] if len(entry1) > 2 else ''
+                        time1 = entry1[3] if len(entry1) > 3 else ''
+                        date2 = entry2[2] if len(entry2) > 2 else ''
+                        time2 = entry2[3] if len(entry2) > 3 else ''
+                        
+                        print(f"  Extracted labels: a1={a1}, a2={a2}")
+                        print(f"  Dates: date1={date1}, date2={date2}")
+                        print(f"  Times: time1={time1}, time2={time2}")
+                        
+                        if a1 not in ['h', 'e'] or a2 not in ['h', 'e']:
+                            print(f"  Skipping due to invalid annotations")
+                            continue
+                        
+                        try:
+                            kappa_score = cohen_kappa_score([a1], [a2])
+                            if np.isnan(kappa_score):
+                                kappa_score = 1.0 if a1 == a2 else 0.0
+                        except Exception as e:
+                            print(f"  Error calculating Cohen's kappa: {e}")
+                            if a1 == a2:
+                                kappa_score = 1.0
+                            else:
+                                kappa_score = 0.0
+                        
+                        identical = 1 if a1 == a2 else 0
+                        
+                        row = [
+                            sentence_text, date1, time1, a1,
+                            sentence_text, date2, time2, a2,
+                            identical, 1, kappa_score
+                        ]
+                        
+                        writer.writerow(row)
+                        rows_written += 1
+                        print(f"  Written row {rows_written}: Cohen Kappa = {kappa_score:.4f}")
+                        
+                        if kappa_score < kappa_threshold:
+                            print(f"    (Below threshold {kappa_threshold}, but still included)")
+                            
+                    except Exception as e:
+                        print(f"Error processing sentence '{sentence_text[:50]}...': {e}")
+                        continue
+                
+                print(f"Total rows written for Cohen: {rows_written}")
 
-                if float(str(kappa_score)) >= float(kappa):
-                    writer.writerow(row)
+        return send_file(filename, as_attachment=True)
 
-            counter -= 1
+    def extract_labels(tag_data, task):
+        if not tag_data:
+            return []
+        elif task in ['ner', 'pos']:
+            if isinstance(tag_data, str):
+                try:
+                    tag_data = json.loads(tag_data)
+                except:
+                    return []
+            labels = []
+            if isinstance(tag_data, list) and tag_data:
+                for item in tag_data:
+                    if isinstance(item, dict) and 'entity' in item:
+                        labels.append(item['entity'])
+                    elif isinstance(item, dict) and 'word' in item:
+                        labels.append(item.get('entity', 'X'))
+            return labels
+        else:  # lid and others
+            if isinstance(tag_data, list) and tag_data and isinstance(tag_data[0], dict):
+                return [item.get('value', '') for item in tag_data if item.get('value', '')]
+            elif isinstance(tag_data, list):
+                return [item for item in tag_data if item]
+            return []
 
-    return send_file('csv/IAA.csv', as_attachment=True)
+    def calculate_kappa_score(ann1, ann2, task_type):
+        if not ann1 or not ann2:
+            return 0.0
+        min_len = min(len(ann1), len(ann2))
+        if min_len == 0:
+            return 0.0
+        ann1_trunc = ann1[:min_len]
+        ann2_trunc = ann2[:min_len]
+        all_labels = list(set(ann1_trunc + ann2_trunc))
+        if len(all_labels) <= 1:
+            return 1.0 if ann1_trunc == ann2_trunc else 0.0
+        return cohen_kappa_score(ann1_trunc, ann2_trunc, labels=all_labels)
 
+    def calculate_structured_fleiss_kappa(ann1, ann2, ann3):
+        n = min(len(ann1), len(ann2), len(ann3))
+        if n == 0:
+            return 0.0
+        ann1, ann2, ann3 = ann1[:n], ann2[:n], ann3[:n]
+        categories = sorted(list(set(ann1 + ann2 + ann3)))
+        if len(categories) <= 1:
+            return 1.0
+        matrix = np.zeros((n, len(categories)), dtype=int)
+        cat2idx = {cat: idx for idx, cat in enumerate(categories)}
+        for i in range(n):
+            for ann in [ann1[i], ann2[i], ann3[i]]:
+                if ann in cat2idx:
+                    matrix[i, cat2idx[ann]] += 1
+        return fleiss_kappa(matrix)
+
+    def prepare_fleiss_data(ann1, ann2, ann3):
+        n = min(len(ann1), len(ann2), len(ann3))
+        if n == 0:
+            return np.array([[]])
+        ann1, ann2, ann3 = ann1[:n], ann2[:n], ann3[:n]
+        categories = sorted(list(set(ann1 + ann2 + ann3)))
+        matrix = np.zeros((n, len(categories)), dtype=int)
+        cat2idx = {cat: idx for idx, cat in enumerate(categories)}
+        for i in range(n):
+            for ann in [ann1[i], ann2[i], ann3[i]]:
+                if ann in cat2idx:
+                    matrix[i, cat2idx[ann]] += 1
+        return matrix
+
+    def get_sentence_field(sent_list, idx, field_name):
+        if idx >= len(sent_list) or format_map.get(field_name) is None:
+            return None
+        sentence = sent_list[idx]
+        index = format_map.get(field_name)
+        return sentence[index] if index < len(sentence) else None
+
+    def generate_headers(u1, u2, u3=None):
+        base_fields = ['date', 'tag', 'link', 'hashtag', 'time']
+        headers = []
+        for user in [u1, u2] + ([u3] if u3 else []):
+            for field in base_fields:
+                if field in format_map:
+                    headers.append(f"{field}_{user}")
+            headers.append('')  # Separator
+        if kappa_type == 'fleiss' and u3:
+            headers.extend(['words_with_similar_annotation_all', 'total_words', f'Fleiss_Kappa_{task_type.upper()}'])
+        elif u3:
+            headers.extend([
+                'words_with_similar_annotation_12', 'words_with_similar_annotation_13', 'words_with_similar_annotation_23',
+                'total_words', 'Cohen_Kappa_12', 'Cohen_Kappa_13', 'Cohen_Kappa_23', f'Avg_Cohen_Kappa_{task_type.upper()}'
+            ])
+        else:
+            headers.extend(['words_with_similar_annotation', 'total_words', f'Cohen_Kappa_Score_{task_type.upper()}'])
+        return headers
+
+    # Continue with existing logic for other tasks...
+    headers = generate_headers(username1, username2, username3)
+    os.makedirs('csv', exist_ok=True)
+    filename = f'csv/IAA_{task_type.upper()}_{kappa_type}.csv'
+
+    if task_type != 'matrix':
+        with open(filename, 'w', encoding='utf-8', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(headers)
+
+            for i in reversed(range(counter)):
+                try:
+                    date_1 = get_sentence_field(sent1, i, 'date') or ''
+                    time_1 = get_sentence_field(sent1, i, 'time') or ''
+                    link_1 = get_sentence_field(sent1, i, 'link') or ''
+                    hashtag_1 = get_sentence_field(sent1, i, 'hashtag') or []
+                    tag_1 = get_sentence_field(sent1, i, 'tags') or []
+
+                    date_2 = get_sentence_field(sent2, i, 'date') or ''
+                    time_2 = get_sentence_field(sent2, i, 'time') or ''
+                    link_2 = get_sentence_field(sent2, i, 'link') or ''
+                    hashtag_2 = get_sentence_field(sent2, i, 'hashtag') or []
+                    tag_2 = get_sentence_field(sent2, i, 'tags') or []
+
+                    empty = ''
+
+                    ann1 = extract_labels(tag_1, task_type)
+                    ann2 = extract_labels(tag_2, task_type)
+                    if not ann1 or not ann2:
+                        continue
+
+                    if username3:
+                        date_3 = get_sentence_field(sent3, i, 'date') or ''
+                        time_3 = get_sentence_field(sent3, i, 'time') or ''
+                        link_3 = get_sentence_field(sent3, i, 'link') or ''
+                        hashtag_3 = get_sentence_field(sent3, i, 'hashtag') or []
+                        tag_3 = get_sentence_field(sent3, i, 'tags') or []
+                        ann3 = extract_labels(tag_3, task_type)
+                        if not ann3:
+                            continue
+
+                        total_words = max(len(ann1), len(ann2), len(ann3))
+                        min_len = min(len(ann1), len(ann2), len(ann3))
+
+                        if kappa_type == 'fleiss':
+                            words_sim_all = sum(1 for x in range(min_len) if ann1[x] == ann2[x] == ann3[x])
+                            kappa_score = calculate_structured_fleiss_kappa(ann1, ann2, ann3)
+                            row = [
+                                date_1, tag_1, link_1, hashtag_1, time_1, empty,
+                                date_2, tag_2, link_2, hashtag_2, time_2, empty,
+                                date_3, tag_3, link_3, hashtag_3, time_3, empty,
+                                words_sim_all, total_words, kappa_score
+                            ]
+                            if kappa_score >= kappa_threshold:
+                                writer.writerow(row)
+                        else:
+                            words_12 = sum(1 for x in range(min_len) if ann1[x] == ann2[x])
+                            words_13 = sum(1 for x in range(min_len) if ann1[x] == ann3[x])
+                            words_23 = sum(1 for x in range(min_len) if ann2[x] == ann3[x])
+                            kappa_12 = calculate_kappa_score(ann1, ann2, task_type)
+                            kappa_13 = calculate_kappa_score(ann1, ann3, task_type)
+                            kappa_23 = calculate_kappa_score(ann2, ann3, task_type)
+                            avg_kappa = np.mean([kappa_12, kappa_13, kappa_23])
+
+                            row = [
+                                date_1, tag_1, link_1, hashtag_1, time_1, empty,
+                                date_2, tag_2, link_2, hashtag_2, time_2, empty,
+                                date_3, tag_3, link_3, hashtag_3, time_3, empty,
+                                words_12, words_13, words_23, total_words, kappa_12, kappa_13, kappa_23, avg_kappa
+                            ]
+                            if avg_kappa >= kappa_threshold:
+                                writer.writerow(row)
+                    else:
+                        min_len = min(len(ann1), len(ann2))
+                        total_words = max(len(ann1), len(ann2))
+                        words_sim = sum(1 for x in range(min_len) if ann1[x] == ann2[x])
+                        kappa_score = calculate_kappa_score(ann1, ann2, task_type)
+
+                        row = [
+                            date_1, tag_1, link_1, hashtag_1, time_1, empty,
+                            date_2, tag_2, link_2, hashtag_2, time_2, empty,
+                            words_sim, total_words, kappa_score
+                        ]
+                        if kappa_score >= kappa_threshold:
+                            writer.writerow(row)
+
+                except Exception as e:
+                    print(f"Error processing sentence index {i}: {e}")
+                    continue
+
+        if not os.path.exists(filename):
+            return "No data written to CSV; check kappa threshold or data alignment", 404
+        return send_file(filename, as_attachment=True)
+
+    return f"Unsupported task_type '{task_type}'", 400
 
 @app.route('/submit-matrix-sentence', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
