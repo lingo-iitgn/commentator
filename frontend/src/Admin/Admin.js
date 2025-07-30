@@ -87,169 +87,246 @@ const Admin = () => {
     const compareAnnotators = process.env.REACT_APP_BACKEND_URL + '/compare-annotators';
 
     return (
-        <div>
+        <StyledContainer>
             <Navbar />
-            <StyledFlexContainer>
+            <StyledMainContent>
+                <StyledTopSection>
+                    {/* File Upload Form */}
+                    <StyledCard>
+                        <StyledCardTitle>File Upload</StyledCardTitle>
+                        <StyledForm onSubmit={handleFileUpload} encType="multipart/form-data">
+                            <StyledFileInput 
+                                type='file' 
+                                name="file" 
+                                onChange={e => setFile(e.target.files[0])} 
+                            />
+                            <StyledButton type="submit">Submit</StyledButton>
+                        </StyledForm>
+                    </StyledCard>
 
-                <form onSubmit={handleFileUpload} encType="multipart/form-data">
-                <input type='file' name="file" onChange={e => setFile(e.target.files[0])} />
-                <StyledButton type="submit">Submit</StyledButton>
-                </form>
+                    {/* CSV Download Form */}
+                    <StyledCard>
+                        <StyledCardTitle>CSV Download</StyledCardTitle>
+                        <StyledForm method="POST" encType="multipart/form-data" onSubmit={handleDownload}>
+                            <StyledInputRow>
+                                <StyledSelect name="username">
+                                    <option value="ALL">ALL</option>
+                                    {userList.map((elem, index) => (
+                                        <option key={index} value={elem}>{elem}</option>
+                                    ))}
+                                </StyledSelect>
+                                
+                                <StyledSelect name="file_type" onChange={e => setFileType(e.target.value)}>
+                                    <option value="lid">LID</option>
+                                    <option value="pos">POS</option>
+                                    <option value="matrix">MATRIX</option>
+                                    <option value="ner">NER</option>
+                                    <option value="translation">TRANSLATION</option>
+                                </StyledSelect>
+                            </StyledInputRow>
+                            
+                            <StyledInput
+                                name="cmi"
+                                type='text'
+                                placeholder='Enter CMI Threshold'
+                                onChange={(e) => setCmi(e.target.value)}
+                                required
+                            />
+                            <StyledButton type="submit">Download CSV</StyledButton>
+                        </StyledForm>
+                    </StyledCard>
+                </StyledTopSection>
 
-                <StyledForm method="POST" encType="multipart/form-data" onSubmit={handleDownload}>
-                    <StyledTextInput as="select" name="username" placeholder='Enter username'>
-                        <option value="ALL" name="option_tag">ALL</option>
-                        {userList.map((elem, index) => (
-                            <option key={index} value={elem} name="option_tag">{elem}</option>
-                        ))}
-                    </StyledTextInput>
+                <StyledIAASection>
+                    <StyledCompareForm method="POST" action={compareAnnotators} encType="multipart/form-data">
+                        <StyledTitle>Inter Annotator Agreement</StyledTitle>
+                        
+                        <StyledFormRow>
+                            <StyledFieldGroup>
+                                <StyledLabel>Task Type:</StyledLabel>
+                                <StyledSelect name="task_type">
+                                    <option value="lid">LID (Language Identification)</option>
+                                    <option value="pos">POS (Part of Speech)</option>
+                                    <option value="matrix">MATRIX</option>
+                                    <option value="ner">NER (Named Entity Recognition)</option>
+                                    <option value="translation">TRANSLATION</option>
+                                </StyledSelect>
+                            </StyledFieldGroup>
 
-                    <StyledTextInput as="select" name="file_type" onChange={e => setFileType(e.target.value)}>
-                        <option value="lid">LID</option>
-                        <option value="pos">POS</option>
-                        <option value="matrix">MATRIX</option>
-                        <option value="ner">NER</option>
-                        <option value="translation">TRANSLATION</option>
-                    </StyledTextInput>
+                            <StyledFieldGroup>
+                                <StyledLabel>Kappa Type:</StyledLabel>
+                                <StyledSelect 
+                                    name="kappa_type" 
+                                    value={kappaType}
+                                    onChange={handleKappaTypeChange}
+                                >
+                                    <option value="cohen">Cohen's Kappa</option>
+                                    <option value="fleiss">Fleiss' Kappa</option>
+                                </StyledSelect>
+                            </StyledFieldGroup>
+                        </StyledFormRow>
 
-                    <StyledKappa
-                        name="cmi"
-                        type='text'
-                        placeholder='Enter CMI Threshold'
-                        onChange={(e) => setCmi(e.target.value)}
-                        required
-                    />
-                    <StyledButton type="submit">Download CSV</StyledButton>
-                </StyledForm>
-            </StyledFlexContainer>
+                        <StyledFormRow>
+                            <StyledSelect name="username1" required>
+                                <option value="">Select Annotator 1</option>
+                                {userList.map((elem, index) => (
+                                    <option key={index} value={elem}>{elem}</option>
+                                ))}
+                            </StyledSelect>
 
-            <StyledCompareForm method="POST" action={compareAnnotators} encType="multipart/form-data">
-                <StyledTitle>Inter Annotator Agreement</StyledTitle>
-                
-                {/* Kappa Type Selection */}
-                <StyledFlexRow>
-                    <StyledLabel>Kappa Type:</StyledLabel>
-                    <StyledTextInput 
-                        as="select" 
-                        name="kappa_type" 
-                        value={kappaType}
-                        onChange={handleKappaTypeChange}
-                        isCompareForm={true}
-                    >
-                        <option value="cohen">Cohen's Kappa </option>
-                        <option value="fleiss">Fleiss' Kappa </option>
-                    </StyledTextInput>
-                </StyledFlexRow>
+                            <StyledSelect name="username2" required>
+                                <option value="">Select Annotator 2</option>
+                                {userList.map((elem, index) => (
+                                    <option key={index} value={elem}>{elem}</option>
+                                ))}
+                            </StyledSelect>
 
-                {/* Annotator Selection */}
-                <StyledFlexRow>
-                    <StyledTextInput as="select" name="username1" placeholder='Select Annotator 1' required isCompareForm={true}>
-                        <option value="">Select Annotator 1</option>
-                        {userList.map((elem, index) => (
-                            <option key={index} value={elem} name="option_tag">{elem}</option>
-                        ))}
-                    </StyledTextInput>
+                            {kappaType === 'fleiss' && (
+                                <StyledSelect name="username3" required>
+                                    <option value="">Select Annotator 3</option>
+                                    {userList.map((elem, index) => (
+                                        <option key={index} value={elem}>{elem}</option>
+                                    ))}
+                                </StyledSelect>
+                            )}
+                        </StyledFormRow>
 
-                    <StyledTextInput as="select" name="username2" placeholder='Select Annotator 2' required isCompareForm={true}>
-                        <option value="">Select Annotator 2</option>
-                        {userList.map((elem, index) => (
-                            <option key={index} value={elem} name="option_tag">{elem}</option>
-                        ))}
-                    </StyledTextInput>
+                        <StyledFormRow>
+                            <StyledInput
+                                name="kappa"
+                                type='number'
+                                step="0.01"
+                                min="0"
+                                max="1"
+                                placeholder='Enter Kappa Threshold (0-1)'
+                                onChange={(e) => setKappa(e.target.value)}
+                                required
+                            />
+                        </StyledFormRow>
 
-                    {kappaType === 'fleiss' && (
-                        <StyledTextInput as="select" name="username3" placeholder='Select Annotator 3' required isCompareForm={true}>
-                            <option value="">Select Annotator 3</option>
-                            {userList.map((elem, index) => (
-                                <option key={index} value={elem} name="option_tag">{elem}</option>
-                            ))}
-                        </StyledTextInput>
-                    )}
-                </StyledFlexRow>
+                        <StyledInfo>
+                            <strong>Task:</strong> {fileType.toUpperCase()} | <strong>Agreement:</strong> {kappaType === 'cohen' ? "Cohen's Kappa (2 annotators)" : "Fleiss' Kappa (3 annotators)"}
+                            <br />
+                            {fileType.toUpperCase()}: Measures agreement on {fileType === 'lid' ? 'language identification' : fileType === 'pos' ? 'part of speech tagging' : fileType === 'ner' ? 'named entity recognition' : fileType === 'translation' ? 'translation quality' : 'annotation tasks'}
+                        </StyledInfo>
 
-                <StyledFlexRow>
-                    <StyledKappa
-                        name="kappa"
-                        type='number'
-                        step="0.01"
-                        min="0"
-                        max="1"
-                        placeholder='Enter Kappa Threshold (0-1)'
-                        onChange={(e) => setKappa(e.target.value)}
-                        required
-                        isCompareForm={true}
-                    />
-                </StyledFlexRow>
-                <StyledInfo>
-                    {kappaType === 'cohen' 
-                        ? "Cohen's Kappa: Measures agreement between exactly two annotators" 
-                        : "Fleiss' Kappa: Measures agreement among three annotators (requires 3 annotators)"
-                    }
-                </StyledInfo>
-
-                <StyledButton type="submit" isCompareForm={true}>
-                    Download IAA Results ({kappaType === 'cohen' ? "Cohen's" : "Fleiss'"} Kappa)
-                </StyledButton>
-            </StyledCompareForm>
-        </div>
+                        <StyledButton type="submit" isPrimary>
+                            Download IAA Results ({kappaType === 'cohen' ? "Cohen's" : "Fleiss'"} Kappa - {fileType.toUpperCase()})
+                        </StyledButton>
+                    </StyledCompareForm>
+                </StyledIAASection>
+            </StyledMainContent>
+        </StyledContainer>
     );
 };
 
 export default Admin;
 
-const StyledForm = styled.form`
-    border: 2px solid #efefef;
-    padding: 20px;
-    border-radius: 12px;
+// Styled Components
+const StyledContainer = styled.div`
+    min-height: 100vh;
+    background-color: #f8f9fa;
 `;
 
-const StyledFlexContainer = styled.div`
+const StyledMainContent = styled.div`
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+`;
+
+const StyledTopSection = styled.div`
     display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
     gap: 20px;
-    padding: 20px;
+    margin-bottom: 40px;
+    
+    @media (max-width: 768px) {
+        flex-direction: column;
+    }
 `;
 
-const StyledTextInput = styled.select`
-    padding: 12px 8px;
-    color: black;
-    border: 2px solid #efefef;
-    margin: 0px 8px;
-    border-radius: 4px;
-    width: ${props => props.isCompareForm ? '250px' : '200px'};
+const StyledCard = styled.div`
+    flex: 1;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+`;
+
+const StyledCardTitle = styled.h3`
+    color: #502380;
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    font-weight: 600;
+`;
+
+const StyledForm = styled.form`
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+`;
+
+const StyledInputRow = styled.div`
+    display: flex;
+    gap: 12px;
+    
+    @media (max-width: 480px) {
+        flex-direction: column;
+    }
+`;
+
+const StyledFileInput = styled.input`
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
     font-size: 14px;
+    
+    &:focus {
+        outline: none;
+        border-color: #502380;
+    }
 `;
 
-const StyledKappa = styled.input`
-    padding: 0px 8px !important;
-    color: black !important;
-    border: 2px solid #efefef !important;
-    gap: 8px !important;
-    border-radius: 4px !important;
-    margin: 0px 8px !important;
-    height: 40.8px !important;
-    width: ${props => props.isCompareForm ? '250px' : '200px'} !important;
-    font-size: 14px !important;
+const StyledSelect = styled.select`
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    min-width: 200px;
+    
+    &:focus {
+        outline: none;
+        border-color: #502380;
+    }
+`;
+
+const StyledInput = styled.input`
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 14px;
+    
+    &:focus {
+        outline: none;
+        border-color: #502380;
+    }
 `;
 
 const StyledButton = styled.button`
-    background-color: #502380;
+    background-color: ${props => props.isPrimary ? '#502380' : '#6c757d'};
     color: white;
-    border-radius: 8px;
-    padding: ${props => props.isCompareForm ? '8px 20px' : '6px 16px'};
-    height: ${props => props.isCompareForm ? '44px' : '40px'};
-    text-transform: uppercase;
     border: none;
-    min-width: ${props => props.isCompareForm ? '180px' : '120px'};
-    cursor: pointer;
+    border-radius: 6px;
+    padding: 12px 20px;
     font-size: 14px;
-    font-weight: ${props => props.isCompareForm ? '600' : 'normal'};
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
     
     &:hover {
-        background-color: #3d1b63;
-        transform: ${props => props.isCompareForm ? 'translateY(-1px)' : 'none'};
+        background-color: ${props => props.isPrimary ? '#3d1b63' : '#5a6268'};
+        transform: translateY(-1px);
     }
     
     &:active {
@@ -257,52 +334,62 @@ const StyledButton = styled.button`
     }
 `;
 
-const StyledFlexRow = styled.div`
+const StyledIAASection = styled.div`
     display: flex;
-    flex-direction: row;
     justify-content: center;
-    align-items: center;
-    gap: 15px;
-    margin: 15px 0;
-    flex-wrap: wrap;
 `;
 
 const StyledCompareForm = styled.form`
-    border: 2px solid #efefef;
-    padding: 30px;
+    background: white;
+    border: 2px solid #e9ecef;
     border-radius: 12px;
-    width: min-content;
-    text-align: center;
-    margin: 40px auto;
-    min-width: 1200px;
-    max-width: 1500px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 32px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 900px;
 `;
 
 const StyledTitle = styled.h2`
     color: #502380;
-    margin-bottom: 20px;
+    margin: 0 0 32px 0;
     text-align: center;
+    font-size: 24px;
+    font-weight: 600;
+`;
+
+const StyledFormRow = styled.div`
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    align-items: end;
+    
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: stretch;
+    }
+`;
+
+const StyledFieldGroup = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
 `;
 
 const StyledLabel = styled.label`
-    font-weight: bold;
-    color: #333;
-    min-width: 120px;
-    text-align: left;
+    font-weight: 600;
+    color: #495057;
     font-size: 14px;
 `;
 
-
 const StyledInfo = styled.div`
-    background-color: #f0f8ff;
+    background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
     border: 1px solid #87ceeb;
-    border-radius: 6px;
-    padding: 12px;
-    margin: 15px auto; 
+    border-radius: 8px;
+    padding: 16px;
+    margin: 24px 0;
     font-size: 14px;
-    max-width: 700px;
     color: #2c5aa0;
     text-align: center;
-    line-height: 1.4;
+    line-height: 1.5;
 `;
