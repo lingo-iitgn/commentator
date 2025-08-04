@@ -275,7 +275,7 @@ F. Stop Docker Container by Container ID.
   
          - **Mac (Homebrew):**
            ```bash
-           brew services start mongodb-community@6.0
+           brew services start mongodb-community
            ```
   
          - **Linux:**
