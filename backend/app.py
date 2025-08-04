@@ -428,15 +428,22 @@ def admin_file_upload():
                 f"{text}, only give translations to the given text and don't add explanations or extra text."
             )
         else:
-            prompt = f"Translate this to {target_language}:\n{text}, only give translations to the given text and don't add explanations or extra text."
+            prompt = (
+                f"Translate this to {target_language}:\n"
+                f"{text}, only give translations to the given text and don't add explanations or extra text."
+            )
 
-        chat_completion = client.chat.completions.create(
-            messages=[{"role": "system", "content": prompt}],
-            model="llama-3.3-70b-versatile",
-            temperature=0
-        )
-        response = chat_completion.choices[0].message.content.strip()
-        return response.split("\n")[0].strip()
+        try:
+            chat_completion = client.chat.completions.create(
+                messages=[{"role": "system", "content": prompt}],
+                model="llama-3.3-70b-versatile",
+                temperature=0
+            )
+            response = chat_completion.choices[0].message.content.strip()
+            return response.split("\n")[0].strip()
+        except Exception as e:
+            print(f"Error getting completion: {e}")
+            return "Error: API call failed"
     
     ##### OPENAI API Integration for the Translation task #####
 
@@ -2218,3 +2225,4 @@ def all_ner_sentence():
 if __name__ == '__main__':
     init_db()
     app.run(debug=True, host='0.0.0.0', port=5000)
+
