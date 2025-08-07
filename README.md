@@ -389,7 +389,7 @@ This project is licensed under the **Apache-2.0 license** - see the [LICENSE](LI
 
 ## Citation
 
-If you use this framework in your research or work, please cite it as follows:
+If you use COMMENTATOR in your research or work, please cite it as follows:
 
 ```bibtex
 @inproceedings{sheth-etal-2024-commentator,
