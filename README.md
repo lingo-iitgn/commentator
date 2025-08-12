@@ -188,6 +188,8 @@ b. Navigate inside frontend folder
 c. Install all frontend dependencies post 1st application download.
 
     npm install 
+    OR
+    npm install --legacy-peer-deps
 
 > **Note:** For the Translation task, install the [`react-transliterate library`](https://www.npmjs.com/package/react-transliterate) with:
 
