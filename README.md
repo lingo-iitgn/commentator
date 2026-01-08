@@ -356,19 +356,6 @@ Paper Link: [`EMNLP 2024 Demo Paper`](https://aclanthology.org/2024.emnlp-demo.1
 
 Explore the Project: [`Project Website`](https://lingo.iitgn.ac.in/codemixing/)
 
----
-
-
-## 👥 Contributors
-
-Meet the talented team behind the project!
-| Contributor | Name | Links |
-|:------:|:-----------:|:-----:|
-| <img src="https://github.com/user-attachments/assets/7df1cf63-b61e-4254-9480-c8408799f693" width="80" style="border-radius: 50%;" /> | **Rajvee Sheth** | [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/rajvee-sheth/) |
-| <img src="https://github.com/user-attachments/assets/0489b854-3c8e-479e-9aee-2e1c18b8ee0f" width="80" style="border-radius: 50%;" /> | **Shubh Nisar** | [![Website](https://img.shields.io/badge/Website-4285F4?style=plastic&logo=google-chrome&logoColor=white)](https://shubh-nisar.github.io/) |
-| <img src="https://github.com/user-attachments/assets/b1e0757c-df7d-4b44-87fe-0ca2fc65adc0" width="80" style="border-radius: 50%;" /> | **Heenaben Prajapati** | [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/heena-prajapati-4977851a5/) |
-| <img src="https://github.com/user-attachments/assets/93682aa1-4eae-47de-937b-74bb8dbb3db9" width="80" style="border-radius: 50%;" /> | **Himanshu Beniwal** | [![Website](https://img.shields.io/badge/Website-4285F4?style=plastic&logo=google-chrome&logoColor=white)](https://himanshubeniwal.github.io/) |
-| <img src="https://github.com/user-attachments/assets/4b517aba-7bad-4234-8744-e90453cbb365" width="80" style="border-radius: 50%;" /> | **Mayank Singh** | [![Website](https://img.shields.io/badge/Website-4285F4?style=plastic&logo=google-chrome&logoColor=white)](https://mayank4490.github.io/) |
 
 ---
 
