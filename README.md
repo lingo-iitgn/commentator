@@ -55,7 +55,8 @@ COMMENTATOR/
 │   │   ├── Matrix/           # Matrix analysis interface
 │   │   ├── NER/              # NER interface 
 │   │   ├── POS/              # POS tagging interface
-│   │   ├── Translate/        # Translation interface 
+│   │   ├── Translate/        # Translation interface
+|   |   ├── SCN/              # Normalization interface
 │   │   ├── User/             # User management
 │   │   ├── utils/            # Utility functions
 │   │   └── Router.js         # Application routing
@@ -345,6 +346,7 @@ COMMENTATOR provides both annotator interface for efficient and faster annotatio
 |  pos       | POS tags based Identification of Tokens         |
 |  ner       | Named Entity Recognition of Tokens              |
 |  translate | Sentence-level Translation to Target Language   |
+|  scn       | Normalization of the Sentences                  |
 |  sentences | Sentences to be annotated                       |
 |  users     | Admin & Annotator Accounts                      |
 
