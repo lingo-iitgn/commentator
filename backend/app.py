@@ -117,10 +117,12 @@ def init_db():
 def login():
     user_collection = database.get_collection('users')
     lid_collection = database["lid"]  
+    sentences_collection = database["sentences"]
     pos_collection = database["pos"]
     matrix_collection = database["matrix"]
     ner_collection = database["ner"]
     translation_collection = database["translation"]
+    scn_collection = database["scn"]
     requestdata = json.loads(request.data)
     requestdata = json.loads(requestdata['body'])
 
@@ -137,6 +139,7 @@ def login():
     mat_id = None
     ner_id = None
     trans_id = None
+    scn_id = None
 
     if res:
         data = res[0]
@@ -154,10 +157,12 @@ def login():
         error = 'Username not found'
         return jsonify({'error': error}), 404
 
+    # Find latest document for sentId, pos_id, and mat_id
     lid_result = lid_collection.find_one({'user_id': session['user_id']}, sort=[('_id', -1)])
     pos_result = pos_collection.find_one({'user_id': session['user_id']}, sort=[('_id', -1)])
     mat_result = matrix_collection.find_one({'user_id': session['user_id']}, sort=[('_id', -1)])
     ner_result = ner_collection.find_one({'user_id': session['user_id']}, sort=[('_id', -1)])
+    scn_result = scn_collection.find_one({'user_id': session['user_id']}, sort=[('_id', -1)])
     trans_result = translation_collection.find_one({'user_id': session['user_id']}, sort=[('_id', -1)])
     
     
@@ -200,6 +205,16 @@ def login():
         ner_id = 0
         ner_collection.insert_one({'user_id': session['user_id'], 'username': username, 'ner_id': ner_id, 'nerTag': []})
         session['ner_id'] = ner_id
+
+    if scn_result:
+        scn_id = scn_result.get('scn_id', 0) + 1
+        session['scn_id'] = scn_id
+        scnTag = scn_result.get('scnTag', [])
+        scn_collection.update_one({'_id': scn_result['_id']}, {'$set': {'scnTag': scnTag}})
+    else:
+        scn_id = 0
+        scn_collection.insert_one({'user_id': session['user_id'], 'username': username, 'scn_id': scn_id, 'scnTag': []})
+        session['scn_id'] = scn_id
     
     if trans_result:
         trans_id = trans_result.get('trans_id', 0) 
@@ -218,10 +233,12 @@ def login():
         'pos_id': pos_id,
         'mat_id' : mat_id,
         'ner_id' : ner_id,
+        'scn_id' : scn_id,
         'trans_id' : trans_id,
     }
 
-    return jsonify({'success': returning, 'username': session['username'], 'sentId': sentId, 'pos_id': pos_id, 'mat_id': mat_id,  'ner_id' : ner_id, 'trans_id' : trans_id})
+    return jsonify({'success': returning, 'username': session['username'], 'sentId': sentId, 'pos_id': pos_id, 'mat_id': mat_id,  'ner_id' : ner_id,  'scn_id' : scn_id, 'trans_id' : trans_id})
+
 def is_logged_in(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -238,7 +255,35 @@ def is_logged_in(f):
 def logout():
     session.clear()
     return jsonify({'message': "You are logged out"})
-        
+
+@app.route('/get-scn-sentence', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type'])
+def get_scn_sentence():
+    sentences_collection = database["sentences"]
+    requestdata = json.loads(request.data)
+    print("request", requestdata)
+    scn_id = requestdata['scn_id']
+    print("scn_id", scn_id)
+
+    result = sentences_collection.find({'scn_id': scn_id})
+    data = list(result)
+
+    if data:
+        data = data[0]
+        sentence = data.get('sentence', '')
+        scn_id = data.get('scn_id', '')
+        scn_tags = data.get('scn_tags', []) if data.get('scn_tags') is not None else []
+
+        result = {
+            'sentence': sentence,
+            'scn_id': scn_id,
+            'scn_tags': scn_tags,
+            'message': "Sentence Fetched Successfully."
+        }
+        return jsonify({'result': result})
+    else:
+        return jsonify({'result': None, 'error': "No sentence found for the provided sentId"})
+
 @app.route('/get-sentence', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type'])
 def get_sentence():
@@ -399,6 +444,7 @@ def lid_tag():
 
 
 from bson.objectid import ObjectId
+from pydantic import BaseModel
 
 @app.route('/admin-file-upload', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
@@ -418,34 +464,93 @@ def admin_file_upload():
     client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
     class TranslationResult(BaseModel):
-        # hinglish: str
+        hinglish: str
+        spell_correct: str
         english: str
         romanized_hindi: str
         devnagarish: str
 
-    def translate_with_llm(text: str, target_language: str) -> str:
-        if target_language == "Romanized Hindi":
-            prompt = (
-                f"Translate this to {target_language} (write in Roman script):\n"
-                f"{text}, only give translations to the given text and don't add explanations or extra text."
+    def translate_with_llm(text: str, target: str) -> str:
+        prompts = {
+            "Spell correction": (
+                f"Correct spelling, grammar, and normalize the following code-mixed Hindi-English sentence. "
+                f"Correct spelling errors (e.g., commitee → committee), "
+                f"expand informal abbreviations (e.g., tmrw → tomorrow), "
+                f"and resolve phonetic substitutions (e.g., 4eva → forever). "
+                f"Common SMS/short forms: u → you, ur → your, pls → please, thnx → thanks.\n"
+                f"Repeated letters for emphasis: goood → good, yesss → yes.\n"
+                f"Do NOT change meaning.\n\n"
+                f"* “bank” (financial) ≠ “banck” → bank\n\n"
+                f"Replace HTML entities with proper symbols: &quot;  -> '' \n"
+                f"* “banck” as intentional slang for “bunk” (skip class) → keep banck only if context confirms slang; otherwise normalize to bunk.\n\n"
+                f"Preserve the original script strictly:\n"
+                f"- If input word is in Roman script, output in Roman script only.\n"
+                f"- If input word is in Devanagari script, output in Devanagari script only.\n\n"
+                f"Input: \"{text}\"\n\n"
+                f"Return ONLY the corrected and normalized sentence. "
+                f"No explanations, no transliteration, no extra text."
+            ),
+            "English": (
+                f'Translate the following to natural English:\n"{text}"\n\n'
+                f'Return ONLY the English translation. No explanations.'
+            ),
+            "Romanized Hindi": (
+                f'Convert the following to Romanized Hindi (use standard Roman script for Hindi words):\n"{text}"\n\n'
+                f'Return ONLY the Romanized Hindi version. No explanations.'
+            ),
+            "Devanagari": (
+                f'Convert the following to Devanagari Hindi script:\n"{text}"\n\n'
+                f'Return ONLY the Devanagari text. No explanations or Roman script.'
             )
-        else:
-            prompt = (
-                f"Translate this to {target_language}:\n"
-                f"{text}, only give translations to the given text and don't add explanations or extra text."
-            )
+        }
 
-        try:
-            chat_completion = client.chat.completions.create(
-                messages=[{"role": "system", "content": prompt}],
-                model="llama-3.3-70b-versatile",
-                temperature=0
-            )
-            response = chat_completion.choices[0].message.content.strip()
-            return response.split("\n")[0].strip()
-        except Exception as e:
-            print(f"Error getting completion: {e}")
-            return "Error: API call failed"
+        prompt = prompts.get(target)
+        if not prompt:
+            return "Error: Invalid target"
+
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                chat_completion = client.chat.completions.create(
+                    messages=[
+                        {"role": "system", "content": "You are a precise Language expert in NLP domain. Follow instructions exactly."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    model="openai/gpt-oss-120b",
+                    temperature=1,
+                    max_tokens=8192,
+                    top_p=1,
+                )
+                response = chat_completion.choices[0].message.content.strip()
+                return response.split("\n")[0].strip()
+
+            except Exception as e:
+                error_str = str(e).lower()
+                print(f"Attempt {attempt + 1} failed for target '{target}': {e}")
+
+                # Handle rate limits (429) or quota issues
+                if any(code in error_str for code in ["rate limit", "429", "resource_exhausted", "quota"]):
+                    wait_time = (2 ** attempt) * 10  # Exponential backoff: 10s, 20s, 40s
+                    print(f"Rate limited. Retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    # For other errors, don't retry too much
+                    if attempt == max_retries - 1:
+                        return "Error: API failed"
+                    time.sleep(2)
+
+        return "Error: API failed after retries"
+    
+    def translate_sentence(sentence: str) -> TranslationResult:
+            return TranslationResult(
+            hinglish=sentence,
+            spell_correct=translate_with_llm(sentence, "Spell correction"),
+            english=translate_with_llm(sentence, "English"),
+            romanized_hindi=translate_with_llm(sentence, "Romanized Hindi"),
+            devnagarish=translate_with_llm(sentence, "Devanagari")
+        )
+
     
     ##### OPENAI API Integration for the Translation task #####
 
@@ -456,6 +561,7 @@ def admin_file_upload():
 
     # # TranslationResult model
     # class TranslationResult(BaseModel):
+    #     spell_correct: str
     #     english: str
     #     romanized_hindi: str
     #     devnagarish: str
@@ -490,6 +596,7 @@ def admin_file_upload():
     # client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     # class TranslationResult(BaseModel):
     #     hinglish: str
+    #     spell_correct: str
     #     english: str
     #     romanized_hindi: str
     #     devnagarish: str
@@ -517,17 +624,8 @@ def admin_file_upload():
     #             print(f"Error getting completion: {e}")
     #             return "Error: API call failed"
 
-    def translate_sentence(sentence: str) -> TranslationResult:
-        english_translation = translate_with_llm(sentence, "English")
-        romanized_hindi = translate_with_llm(sentence, "Romanized Hindi")
-        devnagarish = translate_with_llm(sentence, "Devanagari Hindi")
-
-        return TranslationResult(
-            hinglish=sentence,
-            english=english_translation,
-            romanized_hindi=romanized_hindi,
-            devnagarish=devnagarish
-        )
+ 
+    
     # Fetch the last IDs for sentences, POS, matrix, and NER
     last_sent_id = 0
     prev_sent = list(sentences_collection.find())
@@ -548,6 +646,9 @@ def admin_file_upload():
     prev_ner = list(sentences_collection.find())
     if prev_ner:
         last_ner_id = prev_ner[-1]['ner_id']
+
+    last_scn = sentences_collection.find_one({"scn_id": {"$exists": True}}, sort=[("scn_id", -1)])
+    last_scn_id = last_scn["scn_id"] if last_scn else 0
     
     last_trans_id = 0
     prev_trans = list(sentences_collection.find())
@@ -574,6 +675,7 @@ def admin_file_upload():
         last_mat_id += 1
         last_ner_id += 1
         last_trans_id += 1
+        last_scn_id += 1
 
         # print(sentence)
         translation_result = translate_sentence(sentence)
@@ -623,6 +725,7 @@ def admin_file_upload():
             "mat_id": last_mat_id,
             "ner_id": last_ner_id,
             "trans_id": last_trans_id,
+            "scn_id": last_scn_id,
             "tags": [],
             "pos_tags": json.dumps(pos_tags[idx], cls=NpEncoder),
             "ner_tags": json.dumps(final_ner_tags, cls=NpEncoder),
@@ -795,7 +898,7 @@ def csv_download():
 
     file_type = request.form.get('file_type')
 
-    lid_file = pos_file = matrix_file = ner_file = translation_file = None
+    lid_file, pos_file, matrix_file, ner_file, translation_file, scn_file = None, None, None, None, None, None
 
     if username and username != 'ALL':
         lid_collection = database.get_collection('lid')
@@ -803,6 +906,7 @@ def csv_download():
         matrix_collection = database.get_collection('matrix')
         ner_collection = database.get_collection('ner')
         translation_collection = database.get_collection('translation')
+        scn_collection = database.get_collection('scn')
 
         user = lid_collection.find_one({'username': username})
         if user:
@@ -810,20 +914,24 @@ def csv_download():
             lid_file = f'csv/{username}_lid.csv'
             with open(lid_file, 'w', encoding='utf-8', newline="") as f:
                 writer = csv.writer(f)
-                writer.writerow(['date', 'lid tags', 'link', 'hashtag', 'time', 'feedback', 'CMI Score'])
+                writer.writerow(['grammar', 'date', 'tag', 'link', 'hashtag', 'time', 'CMI Score'])
                 for sentence in sentTag:
-                    date = sentence[0]
-                    tag = sentence[1]
-                    link = sentence[2]
-                    hashtag = sentence[3] if sentence[4] else []
-                    time = sentence[4]
-                    feedback = sentence[5]
-                    row = [date, tag, link, hashtag, time, feedback]
+                    grammar = sentence[0]
+                    date = sentence[1]
+                    tag = sentence[2]
+                    link = sentence[3]
+                    hashtag = sentence[4] if sentence[4] else []
+                    time = sentence[5]
+                    # feedback = sentence[6]
+                    row = [grammar, date, tag, link, hashtag, time]
 
                     en_count = 0
                     hi_count = 0
                     token_count = 0
                     lang_ind_count = 0
+
+                    if not tag or not isinstance(tag, list):
+                        continue
 
                     for i in range(len(tag)):
                         if tag[i]['value'] == 'e':
@@ -832,7 +940,7 @@ def csv_download():
                             hi_count += 1
                         elif tag[i]['value'] == 'u':
                             lang_ind_count += 1
-                        token_count += 1
+                        token_count += 1    
 
                     max_w = max(en_count, hi_count)
 
@@ -852,12 +960,14 @@ def csv_download():
             pos_file = f'csv/{username}_pos.csv'
             with open(pos_file, 'w', encoding='utf-8', newline="") as f:
                 writer = csv.writer(f)
-                writer.writerow(['date', 'time', 'pos tags', 'feedback'])
+                writer.writerow(['date', 'time', 'tag', 'feedback'])
                 for sentence in posTag:
                     date = sentence[0]
                     time = sentence[1]
                     tags = sentence[2]
                     feedback = sentence[3]
+                    if not tag or not isinstance(tag, list):
+                        continue
                     row = [date, time, tags, feedback]
                     writer.writerow(row)
 
@@ -882,12 +992,12 @@ def csv_download():
             ner_file = f'csv/{username}_ner.csv'
             with open(ner_file, 'w', encoding='utf-8', newline="") as f:
                 writer = csv.writer(f)
-                writer.writerow(['date', 'time', 'ner tags', 'feedback'])
+                writer.writerow(['date', 'time', 'tag', 'feedback'])
                 for sentence in nerTag:
                     date = sentence[0]
                     time = sentence[1]
                     tags = sentence[2]
-                    feedback = sentence[3]
+                    # feedback = sentence[3]
                     if len(sentence) > 3:
                         feedback = sentence[3]
                     else:
@@ -901,9 +1011,10 @@ def csv_download():
             translation_file = f'csv/{username}_translation.csv'
             with open(translation_file, 'w', encoding='utf-8', newline="") as f:
                 writer = csv.writer(f)
+                # Write header row
                 writer.writerow(['date', 'time', 'sentences','eng_tags', 'RH_tags', 'DH_tags', 'feedback'])
                 for tag in trans_tags:
-                    if len(tag) >= 6:  
+                    if len(tag) >= 6:  # Ensure all required fields are present
                         date = tag[0]
                         time = tag[1]
                         sentences = tag[2]
@@ -916,6 +1027,25 @@ def csv_download():
                     else:
                         print(f"Invalid tag format: {tag}")
 
+        # Add SCN collection handling for individual user
+        user = scn_collection.find_one({'username': username})
+        if user:
+            scn_tags = user.get('scnTag', [])
+            scn_file = f'csv/{username}_scn.csv'
+            with open(scn_file, 'w', encoding='utf-8', newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(['date', 'corrected_sentence', 'sentence', 'feedback', 'time'])
+                for sentence in scn_tags:
+                    if len(sentence) >= 3:  
+                        date = sentence[2]
+                        corrected_sentence = sentence[1]
+                        original_sentence = sentence[0]
+                        time = sentence[3]
+                        feedback = sentence[4] if len(sentence) > 4 else None
+                        row = [date, corrected_sentence, original_sentence, time, feedback]
+                        writer.writerow(row)
+                    else:
+                        print(f"Invalid SCN tag format: {sentence}")
 
         if file_type == 'lid' and lid_file:
             return send_file(lid_file, as_attachment=True)
@@ -927,6 +1057,8 @@ def csv_download():
             return send_file(ner_file, as_attachment=True)
         elif file_type == 'translation' and translation_file:
             return send_file(translation_file, as_attachment=True)
+        elif file_type == 'scn' and scn_file:
+            return send_file(scn_file, as_attachment=True)
         else:
             return "File not found", 404
 
@@ -936,13 +1068,14 @@ def csv_download():
         matrix_collection = database.get_collection('matrix')
         ner_collection = database.get_collection('ner')
         translation_collection = database.get_collection('translation')
+        scn_collection = database.get_collection('scn')
 
         # Process all users in POS collection
         all_users_pos = pos_collection.find()
         pos_file = 'csv/all_pos.csv'
         with open(pos_file, 'w', encoding='utf-8', newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(['username', 'date', 'time', 'pos tags', 'feedback'])
+            writer.writerow(['username', 'date', 'time', 'tag', 'feedback'])
             for user in all_users_pos:
                 username = user['username']
                 posTag = user.get('posTag', [])
@@ -959,18 +1092,19 @@ def csv_download():
         lid_file = 'csv/all_lid.csv'
         with open(lid_file, 'w', encoding='utf-8', newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(['username', 'date', 'lid tags', 'link', 'hashtag', 'time', 'feedback', 'CMI Score'])
+            writer.writerow(['username', 'grammar', 'date', 'tag', 'link', 'hashtag', 'time', 'CMI Score'])
             for user in all_users_lid:
                 username = user['username']
                 sentTag = user.get('sentTag', [])
                 for sentence in sentTag:
-                    date = sentence[0]
-                    tag = sentence[1]
-                    link = sentence[2]
-                    hashtag = sentence[3] if sentence[4] else []
-                    time = sentence[4]
-                    feedback = sentence[5]
-                    row = [username, date, tag, link, hashtag, time, feedback]
+                    grammar = sentence[0]
+                    date = sentence[1]
+                    tag = sentence[2]
+                    link = sentence[3]
+                    hashtag = sentence[4] if sentence[4] else []
+                    time = sentence[5]
+                    # feedback = sentence[6]
+                    row = [username, grammar, date, tag, link, hashtag, time]
 
                     en_count = 0
                     hi_count = 0
@@ -1003,7 +1137,7 @@ def csv_download():
         matrix_file = 'csv/all_matrix.csv'
         with open(matrix_file, 'w', encoding='utf-8', newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(['username', 'tags', 'date', 'time', 'feedback'])
+            writer.writerow(['username', 'tags', 'date', 'time'])
             for user in all_users_matrix:
                 username = user['username']
                 matrix_data = user.get('matrixTag', [])
@@ -1011,8 +1145,7 @@ def csv_download():
                     tags = sentence[0]
                     date = sentence[1]
                     time = sentence[2]
-                    feedback = sentence[3] if len(sentence) > 3 else None
-                    row = [username, tags, date, time, feedback]
+                    row = [username, tags, date, time]
                     writer.writerow(row)
 
         all_users_ner = ner_collection.find()
@@ -1027,8 +1160,8 @@ def csv_download():
                     date = sentence[0]
                     time = sentence[1]
                     tags = sentence[2]
-                    feedback = sentence[3] if len(sentence) > 3 else None
-                    row = [username, date, time, tags, feedback]
+                    # feedback = sentence[3]
+                    row = [username, date, time, tags]
                     writer.writerow(row)
 
         all_user_translation = translation_collection.find()
@@ -1040,7 +1173,7 @@ def csv_download():
                 username = user['username']
                 trans_tags = user.get('transTag', [])
                 for sentence in trans_tags:
-                    if len(sentence) >= 5:  
+                    if len(sentence) >= 5:  # Ensure all required fields are present
                         date = sentence[0]
                         time = sentence[1]
                         sentences = sentence[2]
@@ -1053,6 +1186,28 @@ def csv_download():
                     else:
                         print(f"Invalid tag format: {sentence}")
 
+        # Add SCN collection handling for ALL users
+        all_users_scn = scn_collection.find()
+        scn_file = 'csv/all_scn.csv'
+        with open(scn_file, 'w', encoding='utf-8', newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(['username', 'date', 'corrected_sentence', 'sentence', 'time', 'feedback'])
+            
+            for user in all_users_scn:
+                username = user['username']
+                scn_tags = user.get('scnTag', [])
+                for sentence in scn_tags:
+                    if len(sentence) >= 4:  # Ensure all required fields are present
+                        original_sentence = sentence[0]
+                        corrected_sentence = sentence[1]
+                        date = sentence[2]
+                        time = sentence[3]
+                        feedback = sentence[4] if len(sentence) > 4 else None
+                        row = [username, date, corrected_sentence, original_sentence, time, feedback]
+                        writer.writerow(row)
+                    else:
+                        print(f"Invalid SCN tag format: {sentence}")
+
         # Return the requested file
         if file_type == 'pos':
             return send_file(pos_file, as_attachment=True)
@@ -1064,11 +1219,12 @@ def csv_download():
             return send_file(ner_file, as_attachment=True)
         elif file_type == 'translation':
             return send_file(translation_file, as_attachment=True)
+        elif file_type == 'scn':
+            return send_file(scn_file, as_attachment=True)
         else:
             return "File not found", 404
 
     return "Invalid request", 400
-
 
 @app.route('/submit-sentence', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
@@ -1628,6 +1784,56 @@ def submit_mat_sentence():
 
     return jsonify({'result': 'Message Stored Successfully'})
 
+@app.route('/submit-scn-sentence', methods=['POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+def submit_scn_sentence():
+    scn_collection = database.get_collection('scn')
+    try:
+        data = request.get_json()
+        scn_id = data.get('scn_id')
+        sentence = data.get('sentence')
+        full_transliteration = data.get('fullTransliteration', '')
+        username = data.get('username')
+        date = data.get('date')
+        timeDifference = data.get('timeDifference', 0)
+        feedback = data.get('feedback', '')
+        
+        if not scn_id or not username:
+            return jsonify({'error': 'Missing scn_id or username'}), 400
+        
+        new_entry = [sentence, full_transliteration, date, feedback, timeDifference]
+        
+        # Atomic operation: only push if no duplicate exists
+        result = scn_collection.update_one(
+            {
+                'username': username,
+                'scnTag': {'$not': {'$elemMatch': {'$all': [sentence, full_transliteration, date]}}}
+            },
+            {
+                '$set': {'scn_id': scn_id},
+                '$push': {'scnTag': new_entry}
+            }
+        )
+        
+        # If no match, either duplicate exists or user doesn't exist
+        if result.matched_count == 0:
+            # Check if user exists
+            if scn_collection.find_one({'username': username}):
+                return jsonify({'result': 'Duplicate Entry. Not Stored.'})
+            else:
+                # Create new user
+                scn_collection.insert_one({
+                    'username': username,
+                    'scn_id': scn_id,
+                    'scnTag': [new_entry]
+                })
+        
+        return jsonify({'result': 'SCN sentence stored successfully'})
+        
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({'error': str(e)}), 500
+
 
 @app.route('/submit-pos-sentence', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
@@ -1834,6 +2040,53 @@ def ner_edit_sentence():
     else:
         return jsonify({'error': "No sentence found for the provided sentId"})
 
+@app.route('/scn-edit-sentence', methods=['POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+def scn_edit_sentence():
+    try:
+        scn_collection = database["scn"]
+        requestdata = json.loads(request.data)
+        print("request", requestdata)
+
+        scn_id = requestdata.get('scn_id')
+        username = requestdata.get('logged_in_user')
+
+        if scn_id is None or username is None:
+            return jsonify({'error': "Missing scn_id or logged_in_user"}), 400
+
+        scn_id = int(scn_id)
+        user_doc = scn_collection.find_one({'username': username})
+        if not user_doc:
+            return jsonify({'error': "No SCN sentence found for the provided ID"}), 404
+
+        scn_tags = user_doc.get('scnTag', [])
+        print(f"Total scnTag array length: {len(scn_tags)}")
+        print(f"Requested scn_id: {scn_id}")
+        print(f"Array index will be: {scn_id - 1}")
+        
+        if not (1 <= scn_id <= len(scn_tags)):
+            return jsonify({'error': "SCN ID out of range"}), 404
+
+        scnTag = scn_tags[scn_id - 1]
+
+        tags_data = scnTag[1]
+        if not isinstance(tags_data, list):
+            tags_data = []
+
+        result = {
+            'scn_id': scn_id,
+            'sentence': scnTag[0],
+            'scn_sentence': scnTag[1],
+            'date': scnTag[2],
+            'feedback': scnTag[3] if len(scnTag) > 3 else '',
+            'scn_tags': tags_data,
+            'message': "SCN Sentence Fetched Successfully."
+        }
+
+        return jsonify({'result': result})
+    except Exception as e:
+        print(f"Error in /scn-edit-sentence: {e}")
+        return jsonify({'error': "Internal server error"}), 500
 
 @app.route('/trans-edit-sentence', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
@@ -1899,6 +2152,49 @@ def submit_edit_sentence():
     })
 
     return jsonify({'result': 'Message Stored Successfully'})
+
+@app.route('/submit-edit-scn', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+# @is_logged_in
+def submit_edit_scn():
+    scn_collection = database.get_collection('scn')
+    requestdata = json.loads(request.data)
+    print(requestdata)
+    
+    if 'body' in requestdata:
+        requestdata = json.loads(requestdata['body'])
+
+    scn_id = requestdata['scn_id']
+    sentence = requestdata['sentence']
+    scn_sentence = requestdata['scn_sentence']
+    username = requestdata['username']
+    date = requestdata['date']
+    timeDifference = requestdata['timeDifference']
+    feedback = requestdata.get('feedback', '')
+
+    lst = [sentence, scn_sentence, date, feedback, timeDifference]
+
+    print(f"SCN ID: {scn_id}, Sentence: {sentence}, SCN Sentence: {scn_sentence}, Username: {username}")
+
+    user = scn_collection.find({'username': username})
+    user = list(user)
+    
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    scnTag = user[0].get('scnTag', [])
+    
+    while len(scnTag) < scn_id:
+        scnTag.append([])
+    
+    scnTag[scn_id - 1] = lst
+
+    scn_collection.update_one(
+        {'username': username}, 
+        {'$set': {'scnTag': scnTag}}
+    )
+
+    return jsonify({'result': 'SCN Sentence Updated Successfully'})
 
 @app.route('/submit-pos-edit-sentence', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
@@ -2194,6 +2490,45 @@ def all_t_sentence():
     return jsonify({
         'result': trans_tags_range,
         'total_count': total_count  
+    })
+
+@app.route('/all-scn-sentences', methods=['GET', 'POST'])
+# @is_logged_in
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+def all_scn_sentence():
+    scn_collection = database.get_collection('scn')
+    requestdata = json.loads(request.data)
+    requestdata = json.loads(requestdata['body'])
+    print(requestdata)
+    username = json.loads(requestdata['username'])
+
+    if 'start' in requestdata:
+        start_value = requestdata.get('start') 
+        if start_value is not None:
+            start = int(start_value) - 1
+        else:
+            start = 0  
+    else:
+        raise ValueError("Missing or invalid 'start' value in requestdata")
+
+    end = start + 15
+
+    result = scn_collection.find_one({'username': username})
+    
+    if not result:
+        return jsonify({'result': [], 'total_count': 0})
+    
+    scnTag = result.get('scnTag', [])
+    total_count = len(scnTag)
+
+    if end > len(scnTag):
+        end = len(scnTag)
+
+    scn_tags_range = scnTag[start:end]
+
+    return jsonify({
+        'result': scn_tags_range,
+        'total_count': total_count
     })
 
 @app.route('/all-ner-sentences', methods=['GET', 'POST'])

@@ -61,6 +61,11 @@ const Login = (props) => {
         JSON.stringify(res.data.success.ner_id)
       );
     res.data.success &&
+      sessionStorage.setItem(
+        "scn_id",
+        JSON.stringify(res.data.success.scn_id)
+      );
+    res.data.success &&
     sessionStorage.setItem(
       "annote_admin",
       JSON.stringify(res.data.success.admin)
