@@ -27,7 +27,7 @@
         "react-error-overlay": "^6.0.11",
         "react-router": "^6.2.1",
         "react-router-dom": "^6.2.1",
-        "react-scripts": "^5.0.1",
+        "react-scripts": "^0.0.0",
         "react-transliterate": "^1.1.9",
         "stream-http": "^3.2.0",
         "styled-components": "^5.3.3",
@@ -73,4 +73,3 @@
         "eslint-config-react-app": "^7.0.1"
     }
 }
-
