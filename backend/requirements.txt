@@ -16,7 +16,7 @@ jupyterlab>=4.5.7
 requests>=2.32.4
 httpx==0.27.2
 aiohttp>=3.12.14
-python-dotenv==0.19.2
+python-dotenv>=1.2.2
 tqdm==4.67.1
 pydantic==2.7.1
 PyYAML==6.0
